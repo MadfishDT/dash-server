@@ -1,4 +1,4 @@
-import { DB, MySqlDB, IUserInfo } from './rawdb/dbs';
+import { DB, MySqlDB, IUserInfo, IUserProfile } from './rawdb/dbs';
 
 export class UserDB {
     
@@ -17,7 +17,10 @@ export class UserDB {
         return UserDB.instance;
     }
 
-    public queryUser(uncertainUerInfo: IUserInfo) : Promise<IUserInfo | null> {
-        return this.db.getValidUser(uncertainUerInfo.email, uncertainUerInfo.password);
+    public getUser(id: string) : Promise<IUserProfile | null> {
+        return this.db.getUser(id);
+    }
+    public queryUser(userinfo: IUserInfo) : Promise<IUserInfo | null> {
+        return this.db.getValidUser(userinfo.email, userinfo.password);
     }
 }

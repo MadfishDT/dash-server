@@ -6,9 +6,9 @@ import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import { LoginSerivce } from './loginservice';
 import cors from 'cors';
-import { join } from 'path';
 import uuid from 'uuid/v4';
 import { IUserInfo } from './db/rawdb/dbs';
+import { ResponseUtils } from './response';
 
 const responseResultCode = { 
   NOTEXISTUSER : 1,
@@ -35,7 +35,7 @@ export class ServerRouter {
   
   /**
    * @ class App
-   * @ method bootstrap
+   * @ method bootstrap 
    * @ static
    *
    */
@@ -54,15 +54,20 @@ export class ServerRouter {
         this.app.use(cors(option) );
         this.app.use(bodyparser.json());
         this.app.use(bodyparser.urlencoded());
-        this.app.use(passport.initialize());
-        this.app.use(passport.session());
-        try{
-            this.app.get('/', (req : express.Request, res : express.Response, next : express.NextFunction) => {
-                res.send('Hello world');
-        });
+        this.app.use('/photo', express.static(__dirname + '/../assets'));
+        console.log(`current path is: ${__dirname}`);
+            try{
+                this.app.get('/', (req : express.Request, res : express.Response, next : express.NextFunction) => {
+                    res.send('Hello world');
+            });
             this.addSessionRouter();
+            this.app.use(passport.initialize());
+            this.app.use(passport.session());
+         
             this.addLoginRouter();
             this.addLogoutRouter();
+            this.addAuthrequiredRouter();
+           
             return true;
         } catch(e) {
             return false;
@@ -75,15 +80,17 @@ export class ServerRouter {
 
     this.app.use( session({
         genid: (req) => {
+            console.log('Inside session middleware genid function')
+            console.log(`Request object sessionID from client: ${req.sessionID}`)
             return uuid() // use UUIDs for session IDs
         },
         cookie: {
+            secure : true,
             maxAge: 1000 * 60 * 60 // 1H expire time
         },
         store: new fileSessionStore(),
-        secret: '1fe2cf8077ee4cceb346081743c3edad',
+        secret: '1fe1cf8077ee4cceb346081743c3edad',
         resave: false,
-        rolling: true,
         saveUninitialized: true
     }));
         // configure passport.js to use the local strategy
@@ -106,8 +113,8 @@ export class ServerRouter {
 
     // tell passport how to serialize the user
     passport.serializeUser((user: IUserInfo, done: any) => {
-        console.log('Inside serializeUser callback. User id is save to the session file store here')
-        done(null, user);
+        console.log(`Inside serializeUser callback. User id is save to the session file store here ${JSON.stringify(user)}`)
+        done(null, user.id);
     });
 
     // tell passport how to deSerialize the user
@@ -116,6 +123,7 @@ export class ServerRouter {
         console.log(`The user id passport saved in the session file store is: ${user}`);
         done(null, user);
     });
+    console.log('finish add passport se de rialized');
 
   }
  
@@ -141,18 +149,48 @@ export class ServerRouter {
         }});
     }
 
+    public addGetUserRouter(): void {
+        this.app.get('/user', async (req, res) => {
+            if(req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let userProfile = await this.loginService.getUser(req.user.id);
+                    if (userProfile) {
+                        res.json(userProfile);
+                    } else {
+                        res.sendStatus(204); // not found user reponse
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        })
+    }
+
+    public addAuthrequiredRouter(): void {
+        this.app.get('/authrequired', (req, res) => {
+            console.log(`User authenticated? ${req.isAuthenticated()}`);
+            console.log(`User session? ${req.session}`);
+            if(req.isAuthenticated()) {
+                res.sendStatus(200);
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+    
     public addLoginRouter() : void {
         this.app.post('/login', async (req, res, next) => {
             passport.authenticate('local', (err, user, info) => {
                 console.log(`req.user: ${JSON.stringify(req.user)}`)
                 req.login(user, (loginError: any) => {
-                    //console.log('Inside req.login() callback');
-                    //console.log(`req.session.passport: ${JSON.stringify(req.session)}`);
-                    //console.log(`req.session loginError : ${JSON.stringify(loginError)}`);
-                    //console.log(`req.user: ${JSON.stringify(req.user)}`);
+                    console.log(`req.session.passport: ${JSON.stringify(req.session!.passport)}`);
+                    console.log(`req.user: ${JSON.stringify(req.user)}`);
+                    console.log(`loginError: ${JSON.stringify(loginError)}`);
+                
                     if (req.session && req.user) {
                         console.log('success login');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
+                        //return res.json(req.user);
                         return res.send('You were authenticated & logged in!\n');
                     } else {
                         console.log('fail login');

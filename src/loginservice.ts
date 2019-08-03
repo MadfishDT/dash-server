@@ -1,6 +1,6 @@
 import { Gernerators } from './generators'
 import { UserDB} from './db/user-db';
-import { IUserInfo } from './db/dto/datadef';
+import { IUserInfo, IUserProfile } from './db/dto/datadef';
 import * as rx from 'rx';
 import { stringify } from 'querystring';
 
@@ -58,6 +58,12 @@ export class LoginSerivce {
         }
         });
     }
+
+    public async getUser(id: string) : Promise<IUserProfile | null> {
+        let result = await this.userDB.getUser(id);
+        return result;
+    }
+
     public tryLogin(info : IUserInfo) : Promise<IUserInfo | null> {
         return new Promise<IUserInfo | null>( async (resolve) => {
             try {

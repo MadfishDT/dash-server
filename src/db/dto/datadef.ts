@@ -1,7 +1,9 @@
 export interface IUserInfo {
     id? : string;
+    user_name? : string,
+    photo? : string,
     email : string;
-    password : string;
+    password? : string;
 };
 
 export interface IUserProfile {

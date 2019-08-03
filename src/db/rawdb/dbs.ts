@@ -1,3 +1,3 @@
 export { DB } from './db';
 export { MySqlDB } from './mysql-db';
-export { IUserInfo } from '../dto/datadef';
+export { IUserInfo, IUserProfile } from '../dto/datadef';

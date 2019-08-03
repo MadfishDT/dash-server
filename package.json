@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon --watch src --delay 1 --exec ts-node src/www.ts",
-    "build": "webpack --config config/webpack.config.js --mode=production",
+    "build:prod": "webpack --config config/webpack.config.js --mode=production",
+    "build:dev": "webpack --config config/webpack.config.js",
     "tsc": "tsc"
   },
   "repository": {
