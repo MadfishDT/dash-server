@@ -14,7 +14,6 @@ export class Server {
   }
 
   constructor () {
-    
     console.log('start bulk server');
     this.app = express.default();
     this.serverRouter = new ServerRouter(this.app);

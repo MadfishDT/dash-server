@@ -51,6 +51,11 @@ export class ServerRouter {
 
     public loadRouter() : boolean {
         const option = <cors.CorsOptions>corsOptions;
+        this.addSessionRouter();
+         
+        this.app.use(passport.initialize());
+        this.app.use(passport.session());
+        
         this.app.use(cors(option) );
         this.app.use(bodyparser.json());
         this.app.use(bodyparser.urlencoded());
@@ -60,10 +65,6 @@ export class ServerRouter {
                 this.app.get('/', (req : express.Request, res : express.Response, next : express.NextFunction) => {
                     res.send('Hello world');
             });
-            this.addSessionRouter();
-            this.app.use(passport.initialize());
-            this.app.use(passport.session());
-         
             this.addLoginRouter();
             this.addLogoutRouter();
             this.addAuthrequiredRouter();
@@ -85,12 +86,12 @@ export class ServerRouter {
             return uuid() // use UUIDs for session IDs
         },
         cookie: {
-            secure : true,
             maxAge: 1000 * 60 * 60 // 1H expire time
         },
         store: new fileSessionStore(),
         secret: '1fe1cf8077ee4cceb346081743c3edad',
         resave: false,
+        rolling: true,
         saveUninitialized: true
     }));
         // configure passport.js to use the local strategy
@@ -114,7 +115,7 @@ export class ServerRouter {
     // tell passport how to serialize the user
     passport.serializeUser((user: IUserInfo, done: any) => {
         console.log(`Inside serializeUser callback. User id is save to the session file store here ${JSON.stringify(user)}`)
-        done(null, user.id);
+        done(null, user);
     });
 
     // tell passport how to deSerialize the user
@@ -169,7 +170,7 @@ export class ServerRouter {
     public addAuthrequiredRouter(): void {
         this.app.get('/authrequired', (req, res) => {
             console.log(`User authenticated? ${req.isAuthenticated()}`);
-            console.log(`User session? ${req.session}`);
+            console.log(`User session? ${JSON.stringify(req.session)}`);
             if(req.isAuthenticated()) {
                 res.sendStatus(200);
             } else {
@@ -190,8 +191,9 @@ export class ServerRouter {
                     if (req.session && req.user) {
                         console.log('success login');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
-                        //return res.json(req.user);
-                        return res.send('You were authenticated & logged in!\n');
+                        res.type('json');
+                        return res.json(req.user);
+                        //return res.send('You were authenticated & logged in!\n');
                     } else {
                         console.log('fail login');
                         return res.sendStatus(401);
