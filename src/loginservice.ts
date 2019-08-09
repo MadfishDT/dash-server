@@ -61,6 +61,7 @@ export class LoginSerivce {
 
     public async getUser(id: string) : Promise<IUserProfile | null> {
         let result = await this.userDB.getUser(id);
+        console.log(result);
         return result;
     }
 

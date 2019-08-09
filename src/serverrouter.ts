@@ -67,6 +67,8 @@ export class ServerRouter {
             });
             this.addLoginRouter();
             this.addLogoutRouter();
+            this.addGetUserRouter();
+            this.addProfileRequestRouter();
             this.addAuthrequiredRouter();
            
             return true;
@@ -151,10 +153,11 @@ export class ServerRouter {
     }
 
     public addGetUserRouter(): void {
-        this.app.get('/user', async (req, res) => {
+        this.app.get('/profile', async (req, res) => {
             if(req.isAuthenticated()) {
                 if (req.session && req.user) {
                     let userProfile = await this.loginService.getUser(req.user.id);
+                    console.log(`request user profile is: ${JSON.stringify(userProfile)}`);
                     if (userProfile) {
                         res.json(userProfile);
                     } else {
@@ -178,7 +181,18 @@ export class ServerRouter {
             }
         });
     }
-    
+    public addProfileRequestRouter(): void {
+        this.app.get('/profile', (req, res) => {
+            console.log(`User profile? ${req.isAuthenticated()}`);
+            if(req.isAuthenticated()) {
+                console.log(req.user.id);
+                this.loginService.getUser(req.user.id);
+                res.sendStatus(200);
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }    
     public addLoginRouter() : void {
         this.app.post('/login', async (req, res, next) => {
             passport.authenticate('local', (err, user, info) => {

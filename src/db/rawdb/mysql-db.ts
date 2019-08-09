@@ -73,10 +73,8 @@ export class MySqlDB extends DB{
     public getUser(id: string) : Promise< IUserProfile | null> {
         return new Promise< IUserProfile | null>( resolve => {
             const query = `SELECT * FROM user_info WHERE id='${id}' LIMIT 1`;
-            console.log(`login query is: ${query}`);
             this.connection.query(query,
             (error, results, fields) => {
-                console.log(results);
                 if (error) {
                     resolve(null);
                 } else {
