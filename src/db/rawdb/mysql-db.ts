@@ -121,7 +121,7 @@ export class MySqlDB extends DB{
                             id: results[0].id,
                             password: '',
                             photo: results[0].photo,
-                            user_name: results[0].name
+                            user_name: results[0].user_name
                         };
                         resolve(userInDB);
                     } else {

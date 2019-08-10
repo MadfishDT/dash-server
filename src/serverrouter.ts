@@ -174,20 +174,21 @@ export class ServerRouter {
         this.app.get('/authrequired', (req, res) => {
             console.log(`User authenticated? ${req.isAuthenticated()}`);
             console.log(`User session? ${JSON.stringify(req.session)}`);
+            console.log(`User json ${JSON.stringify(req.user)}`);
             if(req.isAuthenticated()) {
-                res.sendStatus(200);
+                res.status(200).json(req.user);
             } else {
                 res.sendStatus(401);
             }
         });
     }
     public addProfileRequestRouter(): void {
-        this.app.get('/profile', (req, res) => {
+        this.app.get('/profile', async (req, res) => {
             console.log(`User profile? ${req.isAuthenticated()}`);
             if(req.isAuthenticated()) {
                 console.log(req.user.id);
-                this.loginService.getUser(req.user.id);
-                res.sendStatus(200);
+                let userProfile = await this.loginService.getUser(req.user.id);
+                res.status(200).json(userProfile);
             } else {
                 res.sendStatus(401);
             }
