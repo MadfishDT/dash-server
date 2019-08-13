@@ -4,6 +4,7 @@ export interface IUserInfo {
     photo? : string,
     email : string;
     password? : string;
+    level?: number;
 };
 
 export interface IUserProfile {
@@ -19,5 +20,6 @@ export interface IUserProfile {
     city: string,
     country: string,
     postal_code: string,
-    about: string
+    about: string,
+    level?: number;
 }

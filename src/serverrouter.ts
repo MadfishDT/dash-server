@@ -58,7 +58,7 @@ export class ServerRouter {
         
         this.app.use(cors(option) );
         this.app.use(bodyparser.json());
-        this.app.use(bodyparser.urlencoded());
+        this.app.use(bodyparser.urlencoded({ extended: true } ));
         this.app.use('/photo', express.static(__dirname + '/../assets'));
         console.log(`current path is: ${__dirname}`);
             try{
@@ -84,7 +84,7 @@ export class ServerRouter {
     this.app.use( session({
         genid: (req) => {
             console.log('Inside session middleware genid function')
-            console.log(`Request object sessionID from client: ${req.sessionID}`)
+
             return uuid() // use UUIDs for session IDs
         },
         cookie: {
@@ -100,11 +100,19 @@ export class ServerRouter {
     passport.use(new LocalStrategy.Strategy (
         { 
             usernameField: 'email',
-            passwordField: 'password'
+            passwordField: 'password',
+            passReqToCallback: true
         },
-        async (email: string, password: string, done) => {
+        async (req: express.Request ,email: string, password: string, done) => {
             console.log('Inside local strategy callback');
-            const user = await this.loginService.tryLogin({email: email, password: password});
+            let code  = 0;
+            let user = null;
+            if(req.body.code) {
+                code = req.body.code;
+                user = await this.loginService.tryAdminLogin({email: email, password: password}, code);
+            } else {
+                user = await this.loginService.tryLogin({email: email, password: password});
+            }
             if(user) {
                 done(null, user);
             } else {
@@ -123,33 +131,20 @@ export class ServerRouter {
     // tell passport how to deSerialize the user
     passport.deserializeUser((user: IUserInfo, done) => {
         console.log('Inside deserializeUser callback')
-        console.log(`The user id passport saved in the session file store is: ${user}`);
         done(null, user);
     });
     console.log('finish add passport se de rialized');
 
   }
  
-  public addLogoutRouter() : void {
+    public addLogoutRouter() : void {
 
-    this.app.post('/logout', async (req, res) => {
-        if (!req.headers.authorization || req.headers.authorization.indexOf('Basic ') === -1) {
-            return res.status(401).json({ result: false, message: 'invalid access' ,
-            reason: responseResultCode.INVALIDACCESS, data: null});
-        }
-        const base64Credentials =  req.headers.authorization.split(' ')[1];
-        const usertoken : string = Buffer.from(base64Credentials, 'base64').toString('ascii');
-
-        if( usertoken) {
-            let logouted : boolean = await this.loginService.tryLogout(usertoken);
-            if(logouted) {
-            res.status(200).json({result: true, data: null, message: 'ok',
-            reasone: responseResultCode.OK});
-        } else {
-            res.status(401).json({ result : false, message: 'not logined user' , 
-            reason: responseResultCode.NOTEXISTUSER, data: null});
-        }
-        }});
+        this.app.post('/logout', async (req, res) => {
+            if(req.isAuthenticated()) {
+                req.logout();
+            }
+            res.sendStatus(401); 
+        });
     }
 
     public addGetUserRouter(): void {
@@ -173,8 +168,6 @@ export class ServerRouter {
     public addAuthrequiredRouter(): void {
         this.app.get('/authrequired', (req, res) => {
             console.log(`User authenticated? ${req.isAuthenticated()}`);
-            console.log(`User session? ${JSON.stringify(req.session)}`);
-            console.log(`User json ${JSON.stringify(req.user)}`);
             if(req.isAuthenticated()) {
                 res.status(200).json(req.user);
             } else {
@@ -182,6 +175,7 @@ export class ServerRouter {
             }
         });
     }
+
     public addProfileRequestRouter(): void {
         this.app.get('/profile', async (req, res) => {
             console.log(`User profile? ${req.isAuthenticated()}`);
@@ -193,16 +187,33 @@ export class ServerRouter {
                 res.sendStatus(401);
             }
         });
-    }    
+    }
+
     public addLoginRouter() : void {
         this.app.post('/login', async (req, res, next) => {
             passport.authenticate('local', (err, user, info) => {
-                console.log(`req.user: ${JSON.stringify(req.user)}`)
                 req.login(user, (loginError: any) => {
                     console.log(`req.session.passport: ${JSON.stringify(req.session!.passport)}`);
-                    console.log(`req.user: ${JSON.stringify(req.user)}`);
-                    console.log(`loginError: ${JSON.stringify(loginError)}`);
-                
+                    if (req.session && req.user) {
+                        console.log('success login');
+                        res.setHeader('Access-Control-Allow-Credentials', 'true');
+                        res.type('json');
+                        return res.json(req.user);
+                        //return res.send('You were authenticated & logged in!\n');
+                    } else {
+                        console.log('fail login');
+                        return res.sendStatus(401);
+                    }
+                });
+            })(req, res, next);
+        });  
+    }
+
+    public addAdminLoginRouter() : void {
+        this.app.post('/adminlogin', async (req, res, next) => {
+            passport.authenticate('local', (err, user, info) => {
+                req.login(user, (loginError: any) => {
+                    console.log(`req.session.passport: ${JSON.stringify(req.session!.passport)}`);
                     if (req.session && req.user) {
                         console.log('success login');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
