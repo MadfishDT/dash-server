@@ -1,4 +1,4 @@
-import { IUserInfo, IUserProfile } from '../dto/datadef' 
+import { IUserInfo, IUserProfile, ICategory } from '../dto/datadef' 
 import { DB } from './db';
 import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
@@ -69,7 +69,61 @@ export class MySqlDB extends DB{
         let result1 = text.replace( /([\\\n\r])/g , `\\$&`);
         return result1.replace("'", "''");
     };
-
+    public getValidAdminUser(email: string, password: string | undefined , code: number): Promise< IUserInfo | null> {
+        return new Promise< IUserInfo | null>( resolve => {
+            const query = `SELECT * FROM user_info WHERE email='${email}' AND password='${password}' AND code='${code}' LIMIT 1`;
+            console.log(`login query is: ${query}`);
+            this.connection.query(query,
+            (error, results, fields) => {
+                console.log(results);
+                if (error) {
+                    resolve(null);
+                } else {
+                    if(results && results.length > 0) {
+                        let userInDB : IUserInfo | null= null;
+                        userInDB = {
+                            email: results[0].email,
+                            id: results[0].id,
+                            password: '',
+                            photo: results[0].photo,
+                            user_name: results[0].user_name,
+                            level: results[0].level
+                        };
+                        resolve(userInDB);
+                    } else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+    public getCategories() : Promise< Array<ICategory> | null> {
+        return new Promise< Array<ICategory> | null>( resolve => {
+            const query = `SELECT * FROM categories WHERE child=1 LIMIT 1`;
+            this.connection.query(query,
+            (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if(results && results.length > 0) {
+                        let categories = new Array<ICategory>();
+                        results.forEach( (item: any) => {
+                            categories.push({ id: item.id, name: item.name, desc: item.desc});    
+                        });
+                        if(categories.length > 0) {
+                            resolve(categories);
+                        } else {
+                            resolve(null);
+                        }
+                    } else {
+                        console.log('not exist user profile');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
     public getUser(id: string) : Promise< IUserProfile | null> {
         return new Promise< IUserProfile | null>( resolve => {
             const query = `SELECT * FROM user_info WHERE id='${id}' LIMIT 1`;
@@ -80,22 +134,28 @@ export class MySqlDB extends DB{
                 } else {
                     if(results && results.length > 0) {
                         let userProfileInDB : IUserProfile | null= null;
-                        userProfileInDB = {
-                            id: results[0].id,
-                            email: results[0].email,
-                            profile: results[0].profile,
-                            photo: results[0].photo,
-                            user_name: results[0].user_name,
-                            first_name: results[0].firest_name,
-                            last_name: results[0].last_name,
-                            phone: results[0].phone,
-                            address: results[0].address,
-                            city: results[0].city,
-                            country: results[0].country,
-                            postal_code: results[0].postal_code,
-                            about: results[0].about
-                        };
-                        resolve(userProfileInDB);
+                        console.log(`level user is ${results[0].level}`)
+                        if(results[0].level <= 0) {
+                            userProfileInDB = {
+                                id: results[0].id,
+                                email: results[0].email,
+                                profile: results[0].profile,
+                                photo: results[0].photo,
+                                user_name: results[0].user_name,
+                                first_name: results[0].firest_name,
+                                last_name: results[0].last_name,
+                                phone: results[0].phone,
+                                address: results[0].address,
+                                city: results[0].city,
+                                country: results[0].country,
+                                postal_code: results[0].postal_code,
+                                about: results[0].about,
+                                level: results[0].level
+                            };
+                            resolve(userProfileInDB);
+                        } else {
+                            resolve(null);
+                        }
                     } else {
                         console.log('not exist user profile');
                         resolve(null);
@@ -115,15 +175,20 @@ export class MySqlDB extends DB{
                     resolve(null);
                 } else {
                     if(results && results.length > 0) {
-                        let userInDB : IUserInfo | null= null;
-                        userInDB = {
-                            email: results[0].email,
-                            id: results[0].id,
-                            password: '',
-                            photo: results[0].photo,
-                            user_name: results[0].user_name
-                        };
-                        resolve(userInDB);
+                        if(results[0].level <= 0) {
+                            let userInDB : IUserInfo | null= null;
+                            userInDB = {
+                                email: results[0].email,
+                                id: results[0].id,
+                                password: '',
+                                photo: results[0].photo,
+                                user_name: results[0].user_name,
+                                level: results[0].level
+                            };
+                            resolve(userInDB);
+                        } else {
+                            resolve(null);
+                        }
                     } else {
                         console.log('not exist user');
                         resolve(null);

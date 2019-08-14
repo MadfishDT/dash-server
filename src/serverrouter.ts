@@ -4,7 +4,7 @@ import sessionFileStore from 'session-file-store';
 import bodyparser from 'body-parser';
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
-import { LoginSerivce } from './loginservice';
+import { LoginSerivce } from './login.service';
 import cors from 'cors';
 import uuid from 'uuid/v4';
 import { IUserInfo } from './db/rawdb/dbs';
@@ -66,6 +66,7 @@ export class ServerRouter {
                     res.send('Hello world');
             });
             this.addLoginRouter();
+            this.addAdminLoginRouter();
             this.addLogoutRouter();
             this.addGetUserRouter();
             this.addProfileRequestRouter();
@@ -107,9 +108,13 @@ export class ServerRouter {
             console.log('Inside local strategy callback');
             let code  = 0;
             let user = null;
-            if(req.body.code) {
+            let authTypeHeader = req.header('X-Auth-Types');
+            console.log(`login type check: ${authTypeHeader}-${req.body}`);
+            if(authTypeHeader === 'admin') {
                 code = req.body.code;
-                user = await this.loginService.tryAdminLogin({email: email, password: password}, code);
+                if(code) {
+                    user = await this.loginService.tryAdminLogin({email: email, password: password}, code);
+                }
             } else {
                 user = await this.loginService.tryLogin({email: email, password: password});
             }
@@ -161,6 +166,26 @@ export class ServerRouter {
                 } else {
                     res.sendStatus(401);
                 }
+            }
+        })
+    }
+
+    public addGetCategoriesRouter(): void {
+        this.app.get('/categories', async (req, res) => {
+            if(req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let userProfile = await this.loginService.getUser(req.user.id);
+                    console.log(`request user profile is: ${JSON.stringify(userProfile)}`);
+                    if (userProfile) {
+                        res.json(userProfile);
+                    } else {
+                        res.sendStatus(204); // not found user reponse
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            } else {
+                res.sendStatus(401);
             }
         })
     }

@@ -1,6 +1,6 @@
 import { Gernerators } from './generators'
 import { UserDB} from './db/user.db';
-import { IUserInfo } from './db/dto/datadef';
+import { IUserInfo, IUserProfile } from './db/dto/datadef';
 import * as rx from 'rx';
 import { stringify } from 'querystring';
 
@@ -26,6 +26,7 @@ export class LoginSerivce {
         await this.tryLogin(info);
         })
     }
+    
     public extentdToken(token : string) : boolean {
         let findToken = this.validTokens.get(token);
         if(findToken) {
@@ -34,6 +35,7 @@ export class LoginSerivce {
         }
         return false;
     }
+
     public validateToken(token : string) : boolean {
         let time = this.validTokens.get(token);
         if(time) {
@@ -48,6 +50,7 @@ export class LoginSerivce {
         }
         return false;
     }
+
     public tryLogout(token : string) : Promise<boolean> {
         return new Promise<boolean>( (resolve) => {
         if(this.validTokens.get(token)) {
@@ -58,8 +61,34 @@ export class LoginSerivce {
         }
         });
     }
+
+    public async getUser(id: string) : Promise<IUserProfile | null> {
+        let result = await this.userDB.getUser(id);
+        console.log(result);
+        return result;
+    }
+
+    public tryAdminLogin(info : IUserInfo, code: number) : Promise<IUserInfo | null> {
+        return new Promise<IUserInfo | null>( async (resolve) => {
+            try {
+                let result = await this.userDB.queryAdminUser(info, code);
+                if(result) {
+                    console.log(`success find user: ${result}`);
+                    resolve(result);
+                    return;
+                } else {
+                    console.log('login fail');
+                }
+            resolve(null);
+            return;
+            }
+            catch(e) {
+                resolve(null);
+            }    
+        });
+    }
+
     public tryLogin(info : IUserInfo) : Promise<IUserInfo | null> {
-        console.log(`request user login ${JSON.stringify(info)}`);
         return new Promise<IUserInfo | null>( async (resolve) => {
             try {
                 let result = await this.userDB.queryUser(info);

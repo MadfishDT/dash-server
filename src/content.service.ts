@@ -1,5 +1,5 @@
 import { Gernerators } from './generators'
-import { UserDB} from './db/user-db';
+import { UserDB} from './db/user.db';
 import { IUserInfo, IUserProfile } from './db/dto/datadef';
 import * as rx from 'rx';
 import { stringify } from 'querystring';
@@ -71,7 +71,7 @@ export class LoginSerivce {
     public tryAdminLogin(info : IUserInfo, code: number) : Promise<IUserInfo | null> {
         return new Promise<IUserInfo | null>( async (resolve) => {
             try {
-                let result = await this.userDB.queryUser(info);
+                let result = await this.userDB.queryAdminUser(info, code);
                 if(result) {
                     console.log(`success find user: ${result}`);
                     resolve(result);

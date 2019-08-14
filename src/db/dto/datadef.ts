@@ -23,3 +23,9 @@ export interface IUserProfile {
     about: string,
     level?: number;
 }
+
+export interface ICategory {
+    id: number;
+    name: string,
+    desc: string
+}

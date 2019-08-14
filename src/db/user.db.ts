@@ -23,4 +23,7 @@ export class UserDB {
     public queryUser(userinfo: IUserInfo) : Promise<IUserInfo | null> {
         return this.db.getValidUser(userinfo.email, userinfo.password);
     }
+    public queryAdminUser(userinfo: IUserInfo, code: number) : Promise<IUserInfo | null> {
+        return this.db.getValidAdminUser(userinfo.email, userinfo.password, code);
+    }
 }
