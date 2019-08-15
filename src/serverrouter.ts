@@ -9,6 +9,7 @@ import cors from 'cors';
 import uuid from 'uuid/v4';
 import { IUserInfo } from './db/rawdb/dbs';
 import { ResponseUtils } from './response';
+import { ContentsService } from './content.service';
 
 const responseResultCode = { 
   NOTEXISTUSER : 1,
@@ -40,6 +41,7 @@ export class ServerRouter {
    *
    */
   private loginService: LoginSerivce;
+  private contentService: ContentsService;
   public static bootstrap (app : express.Application) : ServerRouter {
     return new ServerRouter(app);
   }
@@ -47,6 +49,7 @@ export class ServerRouter {
   constructor (app : express.Application) {
       this.app = app;
       this.loginService  = LoginSerivce.bootstrap();
+      this.contentService = ContentsService.bootstrap();
   }
 
     public loadRouter() : boolean {
@@ -71,6 +74,7 @@ export class ServerRouter {
             this.addGetUserRouter();
             this.addProfileRequestRouter();
             this.addAuthrequiredRouter();
+            this.addGetCategoriesRouter();
            
             return true;
         } catch(e) {
@@ -151,6 +155,24 @@ export class ServerRouter {
             res.sendStatus(401); 
         });
     }
+    public addGetCategoriesRouter(): void {
+        this.app.get('/categories', async (req, res) => {
+            console.log('catagories');
+            if(req.isAuthenticated()) {
+                if(req.session && req.user) {
+                    let result = await this.contentService.getCategories();
+                    console.log(`catagories: ${JSON.stringify(result)}`);
+                    if(result && result.length > 0) {
+                        res.json(result);
+                    } else {
+                        res.sendStatus(404);
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        })
+    }
 
     public addGetUserRouter(): void {
         this.app.get('/profile', async (req, res) => {
@@ -166,26 +188,6 @@ export class ServerRouter {
                 } else {
                     res.sendStatus(401);
                 }
-            }
-        })
-    }
-
-    public addGetCategoriesRouter(): void {
-        this.app.get('/categories', async (req, res) => {
-            if(req.isAuthenticated()) {
-                if (req.session && req.user) {
-                    let userProfile = await this.loginService.getUser(req.user.id);
-                    console.log(`request user profile is: ${JSON.stringify(userProfile)}`);
-                    if (userProfile) {
-                        res.json(userProfile);
-                    } else {
-                        res.sendStatus(204); // not found user reponse
-                    }
-                } else {
-                    res.sendStatus(401);
-                }
-            } else {
-                res.sendStatus(401);
             }
         })
     }

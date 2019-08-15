@@ -18,12 +18,12 @@ export class UserDB {
     }
 
     public getUser(id: string) : Promise<IUserProfile | null> {
-        return this.db.getUser(id);
+        return this.db.readUser(id);
     }
-    public queryUser(userinfo: IUserInfo) : Promise<IUserInfo | null> {
-        return this.db.getValidUser(userinfo.email, userinfo.password);
+    public getValidUser(userinfo: IUserInfo) : Promise<IUserInfo | null> {
+        return this.db.readValidUser(userinfo.email, userinfo.password);
     }
-    public queryAdminUser(userinfo: IUserInfo, code: number) : Promise<IUserInfo | null> {
-        return this.db.getValidAdminUser(userinfo.email, userinfo.password, code);
+    public getValidAdminUser(userinfo: IUserInfo, code: number) : Promise<IUserInfo | null> {
+        return this.db.readValidAdminUser(userinfo.email, userinfo.password, code);
     }
 }

@@ -69,7 +69,7 @@ export class MySqlDB extends DB{
         let result1 = text.replace( /([\\\n\r])/g , `\\$&`);
         return result1.replace("'", "''");
     };
-    public getValidAdminUser(email: string, password: string | undefined , code: number): Promise< IUserInfo | null> {
+    public readValidAdminUser(email: string, password: string | undefined , code: number): Promise< IUserInfo | null> {
         return new Promise< IUserInfo | null>( resolve => {
             const query = `SELECT * FROM user_info WHERE email='${email}' AND password='${password}' AND code='${code}' LIMIT 1`;
             console.log(`login query is: ${query}`);
@@ -98,9 +98,9 @@ export class MySqlDB extends DB{
             });
         });
     }
-    public getCategories() : Promise< Array<ICategory> | null> {
+    public readCategories() : Promise< Array<ICategory> | null> {
         return new Promise< Array<ICategory> | null>( resolve => {
-            const query = `SELECT * FROM categories WHERE child=1 LIMIT 1`;
+            const query = `SELECT * FROM categories WHERE child=0`;
             this.connection.query(query,
             (error, results, fields) => {
                 if (error) {
@@ -124,7 +124,7 @@ export class MySqlDB extends DB{
             });
         });
     }
-    public getUser(id: string) : Promise< IUserProfile | null> {
+    public readUser(id: string) : Promise< IUserProfile | null> {
         return new Promise< IUserProfile | null>( resolve => {
             const query = `SELECT * FROM user_info WHERE id='${id}' LIMIT 1`;
             this.connection.query(query,
@@ -164,7 +164,7 @@ export class MySqlDB extends DB{
             });
         });
     }
-    public getValidUser(email : string, password : string) : Promise< IUserInfo | null> {
+    public readValidUser(email : string, password : string) : Promise< IUserInfo | null> {
         return new Promise< IUserInfo | null>( resolve => {
             const query = `SELECT * FROM user_info WHERE email='${email}' AND password='${password}' LIMIT 1`;
             console.log(`login query is: ${query}`);
