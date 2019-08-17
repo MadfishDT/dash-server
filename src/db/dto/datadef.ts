@@ -5,6 +5,7 @@ export interface IUserInfo {
     email : string;
     password? : string;
     level?: number;
+    company_name?: string;
 };
 
 export interface IUserProfile {
@@ -22,6 +23,8 @@ export interface IUserProfile {
     postal_code: string,
     about: string,
     level?: number;
+    company_name?: string;
+    company_code?: string;
 }
 
 export interface ICategory {

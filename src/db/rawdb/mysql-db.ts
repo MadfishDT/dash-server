@@ -71,7 +71,9 @@ export class MySqlDB extends DB{
     };
     public readValidAdminUser(email: string, password: string | undefined , code: number): Promise< IUserInfo | null> {
         return new Promise< IUserInfo | null>( resolve => {
-            const query = `SELECT * FROM user_info WHERE email='${email}' AND password='${password}' AND code='${code}' LIMIT 1`;
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ci.name as cname `;
+            query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
+            query += `AND ui.password='${password}' AND ui.code='${code}' AND ui.company_code=ci.code LIMIT 1`;
             console.log(`login query is: ${query}`);
             this.connection.query(query,
             (error, results, fields) => {
@@ -80,16 +82,22 @@ export class MySqlDB extends DB{
                     resolve(null);
                 } else {
                     if(results && results.length > 0) {
-                        let userInDB : IUserInfo | null= null;
-                        userInDB = {
-                            email: results[0].email,
-                            id: results[0].id,
-                            password: '',
-                            photo: results[0].photo,
-                            user_name: results[0].user_name,
-                            level: results[0].level
-                        };
-                        resolve(userInDB);
+                        if(results[0].level <= 0) {
+                            let userInDB : IUserInfo | null= null;
+                            userInDB = {
+                                email: results[0].email,
+                                id: results[0].id,
+                                password: '',
+                                photo: results[0].photo,
+                                user_name: results[0].user_name,
+                                level: results[0].level,
+                                company_name: results[0].cname
+                            };
+                            console.log(`userInDB is ${JSON.stringify(userInDB)}`);
+                            resolve(userInDB);
+                        } else {
+                            resolve(null);
+                        }
                     } else {
                         console.log('not exist user');
                         resolve(null);
@@ -126,7 +134,8 @@ export class MySqlDB extends DB{
     }
     public readUser(id: string) : Promise< IUserProfile | null> {
         return new Promise< IUserProfile | null>( resolve => {
-            const query = `SELECT * FROM user_info WHERE id='${id}' LIMIT 1`;
+            let query = `SELECT ui.*, ci.name as cname FROM user_info AS ui JOIN company_info AS ci WHERE ui.id='${id}' `
+            query += `AND ui.company_code=ci.code LIMIT 1`;
             this.connection.query(query,
             (error, results, fields) => {
                 if (error) {
@@ -150,7 +159,9 @@ export class MySqlDB extends DB{
                                 country: results[0].country,
                                 postal_code: results[0].postal_code,
                                 about: results[0].about,
-                                level: results[0].level
+                                level: results[0].level,
+                                company_name: results[0].cname,
+                                company_code: results[0].company_code
                             };
                             resolve(userProfileInDB);
                         } else {
@@ -166,7 +177,9 @@ export class MySqlDB extends DB{
     }
     public readValidUser(email : string, password : string) : Promise< IUserInfo | null> {
         return new Promise< IUserInfo | null>( resolve => {
-            const query = `SELECT * FROM user_info WHERE email='${email}' AND password='${password}' LIMIT 1`;
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ci.name as cname `;
+            query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
+            query += `AND ui.password='${password}' AND ui.company_code=ci.code LIMIT 1`;
             console.log(`login query is: ${query}`);
             this.connection.query(query,
             (error, results, fields) => {
@@ -183,8 +196,10 @@ export class MySqlDB extends DB{
                                 password: '',
                                 photo: results[0].photo,
                                 user_name: results[0].user_name,
-                                level: results[0].level
+                                level: results[0].level,
+                                company_name: results[0].cname
                             };
+                            console.log(`userInDB is ${JSON.stringify(userInDB)}`);
                             resolve(userInDB);
                         } else {
                             resolve(null);
