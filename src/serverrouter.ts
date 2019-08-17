@@ -155,6 +155,7 @@ export class ServerRouter {
             res.sendStatus(401); 
         });
     }
+
     public addGetCategoriesRouter(): void {
         this.app.get('/categories', async (req, res) => {
             console.log('catagories');
@@ -167,6 +168,31 @@ export class ServerRouter {
                     } else {
                         res.sendStatus(404);
                     }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        })
+    }
+
+    public addGetQuestionsRouter(): void {
+        this.app.get('/questions', async (req, res) => {
+            console.log('readQuestions');
+            if(req.isAuthenticated()) {
+                if(req.session && req.user) {
+                    if(req.query.id) {
+                        let id = parseInt(req.query.id, 10);
+                        let result = await this.contentService.getQuestions( id );
+                        console.log(`readQuestions: ${JSON.stringify(result)}`);
+                        if(result && result.length > 0) {
+                            res.json(result);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    } else {
+                        res.sendStatus(400);
+                    }
+                   
                 } else {
                     res.sendStatus(401);
                 }

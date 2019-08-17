@@ -1,4 +1,4 @@
-import { IUserInfo, IUserProfile, ICategory } from '../dto/datadef' 
+import { IUserInfo, IUserProfile, ICategory, IQuestions } from '../dto/datadef' 
 import { DB } from './db';
 import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
@@ -68,7 +68,35 @@ export class MySqlDB extends DB{
     private db_escape_string(text : string) : string {
         let result1 = text.replace( /([\\\n\r])/g , `\\$&`);
         return result1.replace("'", "''");
-    };
+    }
+
+    public readQuestions(categoryid: number) : Promise< Array<IQuestions> | null> {
+        return new Promise< Array<IQuestions> | null>( resolve => {
+            const query = `SELECT * FROM qustions WHERE category_id=${categoryid} ORDER BY order DESC`;
+            this.connection.query(query,
+            (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if(results && results.length > 0) {
+                        let questions = new Array<IQuestions>();
+                        results.forEach( (item: any) => {
+                            questions.push({ data: item.data, order: item.order, type: item.type, id: item.id});    
+                        });
+                        if(questions.length > 0) {
+                            resolve(questions);
+                        } else {
+                            resolve(null);
+                        }
+                    } else {
+                        console.log('not exist user profile');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
     public readValidAdminUser(email: string, password: string | undefined , code: number): Promise< IUserInfo | null> {
         return new Promise< IUserInfo | null>( resolve => {
             let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ci.name as cname `;
@@ -106,6 +134,7 @@ export class MySqlDB extends DB{
             });
         });
     }
+
     public readCategories() : Promise< Array<ICategory> | null> {
         return new Promise< Array<ICategory> | null>( resolve => {
             const query = `SELECT * FROM categories WHERE child=0`;
@@ -132,6 +161,7 @@ export class MySqlDB extends DB{
             });
         });
     }
+
     public readUser(id: string) : Promise< IUserProfile | null> {
         return new Promise< IUserProfile | null>( resolve => {
             let query = `SELECT ui.*, ci.name as cname FROM user_info AS ui JOIN company_info AS ci WHERE ui.id='${id}' `
@@ -175,6 +205,7 @@ export class MySqlDB extends DB{
             });
         });
     }
+
     public readValidUser(email : string, password : string) : Promise< IUserInfo | null> {
         return new Promise< IUserInfo | null>( resolve => {
             let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ci.name as cname `;

@@ -1,6 +1,6 @@
 import { Gernerators } from './generators'
 import { ContentsDB} from './db/contents.db';
-import { ICategory } from './db/dto/datadef';
+import { ICategory, IQuestions } from './db/dto/datadef';
 import * as rx from 'rx';
 import { stringify } from 'querystring';
 
@@ -20,8 +20,13 @@ export class ContentsService {
         this.contentsDB = ContentsDB.getInstance();
     }
     
-    public async getCategories() : Promise<ICategory[] | null> {
+    public async getCategories(): Promise<ICategory[] | null> {
         let result = await this.contentsDB.getCategories();
+        return result;
+    }
+
+    public async getQuestions(id: number): Promise<IQuestions[] | null> {
+        let result = await this.contentsDB.getQuestions(id);
         return result;
     }
 }
