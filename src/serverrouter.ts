@@ -75,7 +75,7 @@ export class ServerRouter {
             this.addProfileRequestRouter();
             this.addAuthrequiredRouter();
             this.addGetCategoriesRouter();
-           
+            this.addGetQuestionsRouter();
             return true;
         } catch(e) {
             return false;
@@ -181,6 +181,7 @@ export class ServerRouter {
             if(req.isAuthenticated()) {
                 if(req.session && req.user) {
                     if(req.query.id) {
+                        console.log(`req.query.id ${req.query.id}`);
                         let id = parseInt(req.query.id, 10);
                         let result = await this.contentService.getQuestions( id );
                         console.log(`readQuestions: ${JSON.stringify(result)}`);
