@@ -63,7 +63,6 @@ export class ServerRouter {
         this.app.use(bodyparser.json());
         this.app.use(bodyparser.urlencoded({ extended: true } ));
         this.app.use('/photo', express.static(__dirname + '/../assets'));
-        console.log(`current path is: ${__dirname}`);
             try{
                 this.app.get('/', (req : express.Request, res : express.Response, next : express.NextFunction) => {
                     res.send('Hello world');
@@ -90,8 +89,6 @@ export class ServerRouter {
 
     this.app.use( session({
         genid: (req) => {
-            console.log('Inside session middleware genid function')
-
             return uuid() // use UUIDs for session IDs
         },
         cookie: {
@@ -111,11 +108,9 @@ export class ServerRouter {
             passReqToCallback: true
         },
         async (req: express.Request ,email: string, password: string, done) => {
-            console.log('Inside local strategy callback');
             let code  = 0;
             let user = null;
             let authTypeHeader = req.header('X-Auth-Types');
-            console.log(`login type check: ${authTypeHeader}-${req.body}`);
             if(authTypeHeader === 'admin') {
                 code = req.body.code;
                 if(code) {
@@ -135,17 +130,13 @@ export class ServerRouter {
 
     // tell passport how to serialize the user
     passport.serializeUser((user: IUserInfo, done: any) => {
-        console.log(`Inside serializeUser callback. User id is save to the session file store here ${JSON.stringify(user)}`)
         done(null, user);
     });
 
     // tell passport how to deSerialize the user
     passport.deserializeUser((user: IUserInfo, done) => {
-        console.log('Inside deserializeUser callback')
         done(null, user);
     });
-    console.log('finish add passport se de rialized');
-
   }
  
     public addLogoutRouter() : void {
@@ -164,7 +155,6 @@ export class ServerRouter {
             if(req.isAuthenticated()) {
                 if(req.session && req.user) {
                     let result = await this.contentService.getCategories();
-                    console.log(`catagories: ${JSON.stringify(result)}`);
                     if(result && result.length > 0) {
                         res.json(result);
                     } else {
@@ -184,7 +174,6 @@ export class ServerRouter {
                 if(req.session && req.user) {
                     if(req.query.id) {
                         let result = await this.contentService.getAnswers(req.query.id);
-                        console.log(`get answers: ${JSON.stringify(result)}`);
                         if(result) {
                             res.json(result);
                         } else {
@@ -206,7 +195,6 @@ export class ServerRouter {
             if(req.isAuthenticated()) {
                 if(req.session && req.user) {
                     if(req.query.id) {
-                        console.log(`req.query.id ${req.query.id}`);
                         let id = parseInt(req.query.id, 10);
                         let result = await this.contentService.getQuestions( id );
                         if(result && result.length > 0) {
@@ -271,7 +259,6 @@ export class ServerRouter {
         this.app.post('/login', async (req, res, next) => {
             passport.authenticate('local', (err, user, info) => {
                 req.login(user, (loginError: any) => {
-                    console.log(`req.session.passport: ${JSON.stringify(req.session!.passport)}`);
                     if (req.session && req.user) {
                         console.log('success login');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -291,8 +278,6 @@ export class ServerRouter {
         this.app.post('/answers', async (req, res, next) => {
             if(req.isAuthenticated()) {
                 const data = req.body.answers;
-                console.log(`post answer ${req.body}`);
-                console.log(`post answer's info ${req.user.id}`);
                 const result = await this.contentService.pushAnswers(req.user.id,req.body.cid,req.body.answers);
                 if(result) {
                     res.sendStatus(200);
@@ -309,8 +294,6 @@ export class ServerRouter {
         this.app.post('/canswers', async (req, res, next) => {
             if(req.isAuthenticated()) {
                 const data = req.body.answers;
-                console.log(`post answer ${req.body}`);
-                console.log(`post answer's info ${req.user.id}`);
                 const result = await this.contentService.pushAnswers(req.user.id,req.body.cid,req.body.answers);
                 if(result) {
                     res.sendStatus(200);
@@ -327,7 +310,6 @@ export class ServerRouter {
         this.app.post('/adminlogin', async (req, res, next) => {
             passport.authenticate('local', (err, user, info) => {
                 req.login(user, (loginError: any) => {
-                    console.log(`req.session.passport: ${JSON.stringify(req.session!.passport)}`);
                     if (req.session && req.user) {
                         console.log('success login');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');

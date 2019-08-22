@@ -84,7 +84,6 @@ export class MySqlDB extends DB {
             let commentQuery = `INSERT INTO answers_confirm(uid, answers, user_id, category_id) `+
             `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` + 
             `'${userid}', '${categorid}')`;
-            console.log(`writeAnswers query ${commentQuery}`);
             this.connection.query(commentQuery, (commenterror) => {
                 console.log(`writeAnswers query ${commenterror}`);
                 if(commenterror) {
@@ -117,7 +116,6 @@ export class MySqlDB extends DB {
         return new Promise<IAnswers | null>( (resolve, reject) => {
             const query = `SELECT * FROM answers_comfirm WHERE uid='${uid}' ORDER BY 'date' DESC LIMIT 1`;
             this.connection.query(query,(error, results, fields) =>{
-                console.log(results);
                 if (error) {
                     resolve(null);
                 } else {
@@ -161,7 +159,6 @@ export class MySqlDB extends DB {
                                 category_id: results[0].category_id,
                                 answers: results[0].answers
                             };
-                            console.log(`answersDB is ${JSON.stringify(answersDB)}`);
                             resolve(answersDB);
                         } else {
                             resolve(null);
@@ -225,7 +222,6 @@ export class MySqlDB extends DB {
             query += `AND ui.password='${password}' AND ui.code='${code}' AND ui.company_code=ci.code LIMIT 1`;
             this.connection.query(query,
                 (error, results, fields) => {
-                    console.log(results);
                     if (error) {
                         resolve(null);
                     } else {
@@ -241,7 +237,6 @@ export class MySqlDB extends DB {
                                     level: results[0].level,
                                     company_name: results[0].cname
                                 };
-                                console.log(`userInDB is ${JSON.stringify(userInDB)}`);
                                 resolve(userInDB);
                             } else {
                                 resolve(null);
@@ -293,7 +288,6 @@ export class MySqlDB extends DB {
                     } else {
                         if (results && results.length > 0) {
                             let userProfileInDB: IUserProfile | null = null;
-                            console.log(`level user is ${results[0].level}`)
                             if (results[0].level <= 0) {
                                 userProfileInDB = {
                                     id: results[0].id,
@@ -332,7 +326,6 @@ export class MySqlDB extends DB {
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.company_code=ci.code LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
-                console.log(results);
                 if (error) {
                     resolve(null);
                 } else {
@@ -348,7 +341,6 @@ export class MySqlDB extends DB {
                                 level: results[0].level,
                                 company_name: results[0].cname
                             };
-                            console.log(`userInDB is ${JSON.stringify(userInDB)}`);
                             resolve(userInDB);
                         } else {
                             resolve(null);
