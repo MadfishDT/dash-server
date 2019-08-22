@@ -1,4 +1,4 @@
-import { IUserInfo, IUserProfile, ICategory, IQuestions } from '../dto/datadef'
+import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers } from '../dto/datadef'
 import { DB } from './db';
 import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
@@ -15,13 +15,22 @@ export class MySqlDB extends DB {
         if (MySqlDB.instance) {
             throw new Error('Error - use MySqlDB.getInstance()');
         }
-        this.connection = mysql.createConnection({
+      /*  this.connection = mysql.createConnection({
             host: 'localhost',
             user: 'bulk',
             password: 'jjang$194324',
             database: 'users',
             timezone: 'utc'
+        });*/
+
+        this.connection = mysql.createConnection({
+            host: '35.193.127.219',
+            user: 'root',
+            password: 'Jjang$194324',
+            database: 'users',
+            timezone: 'utc'
         });
+
         this.initialize();
     }
 
@@ -69,11 +78,122 @@ export class MySqlDB extends DB {
         let result1 = text.replace(/([\\\n\r])/g, `\\$&`);
         return result1.replace("'", "''");
     }
+    public writeAnswersConfirm(userid: string, categorid: number, jsonData: any): Promise<boolean> {
+        console.log(`writeAnswers ${userid} -- ${categorid} -- ${jsonData}`)
+        return new Promise<boolean>( (resolve) => {
+            let commentQuery = `INSERT INTO answers_confirm(uid, answers, user_id, category_id) `+
+            `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` + 
+            `'${userid}', '${categorid}')`;
+            console.log(`writeAnswers query ${commentQuery}`);
+            this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if(commenterror) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+           });
+        });
+    }
+
+    public writeAnswers(userid: string, categorid: number, jsonData: any): Promise<boolean> {
+        console.log(`writeAnswers ${userid} -- ${categorid} -- ${jsonData}`)
+        return new Promise<boolean>( (resolve) => {
+            let commentQuery = `INSERT INTO answers(uid, answers, user_id, category_id) `+
+            `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` + 
+            `'${userid}', '${categorid}')`;
+            this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if(commenterror) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+           });
+        });
+    }
+
+    public readAnswersConfirm(uid: string): Promise<IAnswers | null> {
+        return new Promise<IAnswers | null>( (resolve, reject) => {
+            const query = `SELECT * FROM answers_comfirm WHERE uid='${uid}' ORDER BY 'date' DESC LIMIT 1`;
+            this.connection.query(query,(error, results, fields) =>{
+                console.log(results);
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        if (results[0].level <= 0) {
+                            let answersDB: IAnswers | null = null;
+                            answersDB = {
+                                uid: results[0].uid,
+                                user_id: results[0].user_id,
+                                category_id: results[0].category_id,
+                                answers: results[0].answers
+                            };
+                            console.log(`answersDB is ${JSON.stringify(answersDB)}`);
+                            resolve(answersDB);
+                        } else {
+                            resolve(null);
+                        }
+                    } else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
+    public readAnswers(uid: string): Promise<IAnswers | null> {
+        return new Promise<IAnswers | null>( (resolve, reject) => {
+            const query = `SELECT * FROM answers WHERE uid='${uid}' ORDER BY 'date' DESC LIMIT 1`;
+            this.connection.query(query,(error, results, fields) =>{
+                console.log(results);
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        if (results[0].level <= 0) {
+                            let answersDB: IAnswers | null = null;
+                            answersDB = {
+                                uid: results[0].uid,
+                                user_id: results[0].user_id,
+                                category_id: results[0].category_id,
+                                answers: results[0].answers
+                            };
+                            console.log(`answersDB is ${JSON.stringify(answersDB)}`);
+                            resolve(answersDB);
+                        } else {
+                            resolve(null);
+                        }
+                    } else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
+    public updateAnswer(userid: string, categorid: number, jsonData: any): Promise<boolean> {
+        return new Promise<boolean>( resolve => resolve(true));
+    }
+
+    private convItToTextCode(scriptCode: string): string {
+       
+        let code = scriptCode;
+        let fromAr = new Array(/\\/g,/'/g,/"/g,/\r\n/g,/[\r\n]/g,/\t/g,new RegExp('--'+'>','g'),new RegExp('<!'+'--','g'),/\//g), toAr = new Array('\\\\','\\\'','\\\"','\\n','\\n','\\t','--\'+\'>','<!\'+\'--','\\\/');
+        for( let x = 0; x < fromAr.length; x++ ) {
+            code = code.replace(fromAr[x],toAr[x]);
+        }
+        return code;
+    }
+
+
 
     public readQuestions(categoryid: number): Promise<Array<IQuestions> | null> {
         return new Promise<Array<IQuestions> | null>(resolve => {
             const query = `SELECT * FROM questions WHERE category_id='${categoryid}' ORDER BY 'order' DESC`;
-            console.log(`questions query is: ${query}`);
             this.connection.query(query,
                 (error, results, fields) => {
                     if (error) {
@@ -103,7 +223,6 @@ export class MySqlDB extends DB {
             let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ci.name as cname `;
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.code='${code}' AND ui.company_code=ci.code LIMIT 1`;
-            console.log(`login query is: ${query}`);
             this.connection.query(query,
                 (error, results, fields) => {
                     console.log(results);
@@ -212,7 +331,6 @@ export class MySqlDB extends DB {
             let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ci.name as cname `;
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.company_code=ci.code LIMIT 1`;
-            console.log(`login query is: ${query}`);
             this.connection.query(query, (error, results, fields) => {
                 console.log(results);
                 if (error) {

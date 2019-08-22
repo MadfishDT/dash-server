@@ -39,3 +39,10 @@ export interface IQuestions {
     data: any,
     order: number
 }
+
+export interface IAnswers {
+    uid: number;
+    user_id: string,
+    category_id: number,
+    answers: any
+}

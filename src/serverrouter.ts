@@ -76,6 +76,8 @@ export class ServerRouter {
             this.addAuthrequiredRouter();
             this.addGetCategoriesRouter();
             this.addGetQuestionsRouter();
+            this.addGetAnswersRouter();
+            this.addAnswerRouter();
             return true;
         } catch(e) {
             return false;
@@ -175,6 +177,29 @@ export class ServerRouter {
         })
     }
 
+    public addGetAnswersRouter(): void {
+        this.app.get('/answers', async (req, res) => {
+            console.log('get answers');
+            if(req.isAuthenticated()) {
+                if(req.session && req.user) {
+                    if(req.query.id) {
+                        let result = await this.contentService.getAnswers(req.query.id);
+                        console.log(`get answers: ${JSON.stringify(result)}`);
+                        if(result) {
+                            res.json(result);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    } else {
+                        res.sendStatus(400);
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        });
+    }
+
     public addGetQuestionsRouter(): void {
         this.app.get('/questions', async (req, res) => {
             console.log('readQuestions');
@@ -184,7 +209,6 @@ export class ServerRouter {
                         console.log(`req.query.id ${req.query.id}`);
                         let id = parseInt(req.query.id, 10);
                         let result = await this.contentService.getQuestions( id );
-                        console.log(`readQuestions: ${JSON.stringify(result)}`);
                         if(result && result.length > 0) {
                             res.json(result);
                         } else {
@@ -260,6 +284,42 @@ export class ServerRouter {
                     }
                 });
             })(req, res, next);
+        });  
+    }
+
+    public addAnswerRouter() : void {
+        this.app.post('/answers', async (req, res, next) => {
+            if(req.isAuthenticated()) {
+                const data = req.body.answers;
+                console.log(`post answer ${req.body}`);
+                console.log(`post answer's info ${req.user.id}`);
+                const result = await this.contentService.pushAnswers(req.user.id,req.body.cid,req.body.answers);
+                if(result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });  
+    }
+
+    public addAnswerConfirmRouter() : void {
+        this.app.post('/canswers', async (req, res, next) => {
+            if(req.isAuthenticated()) {
+                const data = req.body.answers;
+                console.log(`post answer ${req.body}`);
+                console.log(`post answer's info ${req.user.id}`);
+                const result = await this.contentService.pushAnswers(req.user.id,req.body.cid,req.body.answers);
+                if(result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
         });  
     }
 

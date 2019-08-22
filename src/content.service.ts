@@ -1,6 +1,7 @@
 import { Gernerators } from './generators'
 import { ContentsDB} from './db/contents.db';
-import { ICategory, IQuestions } from './db/dto/datadef';
+import { ICategory, IQuestions, IAnswers } from './db/dto/datadef';
+import * as fs from 'fs';
 import * as rx from 'rx';
 import { stringify } from 'querystring';
 
@@ -27,6 +28,19 @@ export class ContentsService {
 
     public async getQuestions(id: number): Promise<IQuestions[] | null> {
         let result = await this.contentsDB.getQuestions(id);
+        return result;
+    }
+
+    public async getAnswers(uid: string): Promise<IAnswers | null>  {
+        let result = await this.contentsDB.getAnswers(uid);
+        return result;
+    }
+    public async pushAnswersConfirm(userid: string, categoryid: number, answers: any[]): Promise<boolean>  {
+        let result = await this.contentsDB.pushAnswersConfirm(userid, categoryid, answers);
+        return result;
+    }
+    public async pushAnswers(userid: string, categoryid: number, answers: any[]): Promise<boolean>  {
+        let result = await this.contentsDB.pushAnswers(userid, categoryid, answers);
         return result;
     }
 }

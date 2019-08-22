@@ -1,4 +1,5 @@
 import { DB, MySqlDB, ICategory, IQuestions } from './rawdb/dbs';
+import { IAnswers } from './dto/datadef';
 
 export class ContentsDB {
     
@@ -23,5 +24,17 @@ export class ContentsDB {
 
     public getQuestions(id: number): Promise< Array<IQuestions> | null > {
         return this.db.readQuestions(id);
+    }
+
+    public getAnswers(uid: string): Promise< IAnswers | null > {
+        return this.db.readAnswers(uid);
+    }
+
+    public pushAnswers(userid: string, categorid: number, jsonData: any): Promise<boolean> {
+        return this.db.writeAnswers(userid, categorid, jsonData);
+    }
+
+    public pushAnswersConfirm(userid: string, categorid: number, jsonData: any): Promise<boolean> {
+        return this.db.writeAnswersConfirm(userid, categorid, jsonData);
     }
 }
