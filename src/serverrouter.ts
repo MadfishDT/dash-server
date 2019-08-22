@@ -24,7 +24,7 @@ const responseResultCode = {
 } 
 
 const corsOptions = {
-    'origin': 'http://localhost:8080',
+    'origin': ['http://localhost:8080', 'http://35.192.127.219:8080'],
     'methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
     'preflightContinue': false,
     'credentials': true,
