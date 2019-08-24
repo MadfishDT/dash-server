@@ -62,7 +62,7 @@ export class LoginSerivce {
         console.log(`request user login ${JSON.stringify(info)}`);
         return new Promise<IUserInfo | null>( async (resolve) => {
             try {
-                let result = await this.userDB.queryUser(info);
+                let result = await this.userDB.getValidUser(info);
                 if(result) {
                     console.log(`success find user: ${result}`);
                     resolve(result);
