@@ -15,22 +15,25 @@ export class MySqlDB extends DB {
         if (MySqlDB.instance) {
             throw new Error('Error - use MySqlDB.getInstance()');
         }
-      /*  this.connection = mysql.createConnection({
-            host: 'localhost',
-            user: 'bulk',
-            password: 'jjang$194324',
-            database: 'users',
-            timezone: 'utc'
-        });*/
-
-        this.connection = mysql.createConnection({
-            host: '35.193.127.219',
-            user: 'root',
-            password: 'Jjang$194324',
-            database: 'users',
-            timezone: 'utc'
-        });
-
+        //console.log();
+        const runningMode = process.argv[2];
+        if(runningMode === 'dev') {
+            this.connection = mysql.createConnection({
+                host: 'localhost',
+                user: 'bulk',
+                password: 'jjang$194324',
+                database: 'users',
+                timezone: 'utc'
+            });
+        } else {
+            this.connection = mysql.createConnection({
+                host: '35.193.127.219',
+                user: 'root',
+                password: 'Jjang$194324',
+                database: 'users',
+                timezone: 'utc'
+            });
+        }
         this.initialize();
     }
 
