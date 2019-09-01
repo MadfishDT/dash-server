@@ -61,7 +61,10 @@ export class LoginSerivce {
         }
         });
     }
-
+    public async updateAgreement(userid: string) : Promise<boolean> {
+        const result = await this.userDB.updateAgreement(userid);
+        return result;
+    }
     public async getUser(id: string) : Promise<IUserProfile | null> {
         let result = await this.userDB.getUser(id);
         console.log(result);

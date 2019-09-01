@@ -1,6 +1,5 @@
 import express from 'express';
 import session from 'express-session';
-import sessionFileStore from 'session-file-store';
 import bodyparser from 'body-parser';
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
@@ -10,6 +9,7 @@ import uuid from 'uuid/v4';
 import { IUserInfo } from './db/rawdb/dbs';
 import { ResponseUtils } from './response';
 import { ContentsService } from './content.service';
+const MySQLStore = require('express-mysql-session')(session);
 
 const responseResultCode = { 
   NOTEXISTUSER : 1,
@@ -78,6 +78,7 @@ export class ServerRouter {
             this.addGetQuestionsRouter();
             this.addGetAnswersRouter();
             this.addAnswerRouter();
+            this.addAgreementRouter();
             return true;
         } catch(e) {
             return false;
@@ -85,8 +86,12 @@ export class ServerRouter {
   }
 
   private addSessionRouter(): void {
-
-    const fileSessionStore = sessionFileStore(session);
+    const sqlStore = new MySQLStore({
+        host: '35.193.127.219',
+        user: 'root',
+        password: 'Jjang$194324',
+        database: 'sessions',
+    });
 
     this.app.use( session({
         genid: (req) => {
@@ -95,10 +100,9 @@ export class ServerRouter {
         cookie: {
             maxAge: 1000 * 60 * 60 // 1H expire time
         },
-        store: new fileSessionStore(),
+        store: sqlStore,
         secret: '1fe1cf8077ee4cceb346081743c3edad',
         resave: false,
-        rolling: true,
         saveUninitialized: true
     }));
         // configure passport.js to use the local strategy
@@ -230,6 +234,23 @@ export class ServerRouter {
                 }
             }
         })
+    }
+
+    public addAgreementRouter(): void {
+        this.app.post('/agree', async (req, res) => {
+            console.log(`update agreement? ${req.isAuthenticated()}`);
+            if(req.isAuthenticated()) {
+                let result = await this.loginService.updateAgreement(req.user.id);
+                if( result ) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(500);
+                }
+                
+            } else {
+                res.sendStatus(401);
+            }
+        });
     }
 
     public addAuthrequiredRouter(): void {

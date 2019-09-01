@@ -26,4 +26,7 @@ export class UserDB {
     public getValidAdminUser(userinfo: IUserInfo, code: number) : Promise<IUserInfo | null> {
         return this.db.readValidAdminUser(userinfo.email, userinfo.password, code);
     }
+    public updateAgreement(userid: string) : Promise<boolean>  {
+        return this.db.updateUserAgreement(userid);
+    }
 }

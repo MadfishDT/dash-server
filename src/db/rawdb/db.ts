@@ -15,4 +15,5 @@ export abstract class DB {
     public abstract readAnswers(uid: string): Promise<IAnswers | null>;
     public abstract writeAnswers(userid: string, categorid: number, jsonData: any): Promise<boolean>;
     public abstract updateAnswer(userid: string, categorid: number, jsonData: any): Promise<boolean>;
+    public abstract updateUserAgreement(userid: string): Promise<boolean>;
 }
