@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const express_session_1 = __importDefault(require("express-session"));
-const session_file_store_1 = __importDefault(require("session-file-store"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const passport_1 = __importDefault(require("passport"));
 const passport_local_1 = __importDefault(require("passport-local"));
@@ -21,6 +20,7 @@ const login_service_1 = require("./login.service");
 const cors_1 = __importDefault(require("cors"));
 const v4_1 = __importDefault(require("uuid/v4"));
 const content_service_1 = require("./content.service");
+const MySQLStore = require('express-mysql-session')(express_session_1.default);
 const responseResultCode = {
     NOTEXISTUSER: 1,
     INVALIDACCESS: 2,
@@ -33,7 +33,8 @@ const responseResultCode = {
     OK: 0,
 };
 const corsOptions = {
-    'origin': ['http://localhost:8080', 'http://35.192.127.219:8080'],
+    'origin': ['http://localhost:8080', 'http://localhost:8081',
+        'http://localhost:8082', 'http://35.193.127.219:8080'],
     'methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
     'preflightContinue': false,
     'credentials': true,
@@ -71,6 +72,7 @@ class ServerRouter {
             this.addGetQuestionsRouter();
             this.addGetAnswersRouter();
             this.addAnswerRouter();
+            this.addAgreementRouter();
             return true;
         }
         catch (e) {
@@ -78,7 +80,12 @@ class ServerRouter {
         }
     }
     addSessionRouter() {
-        const fileSessionStore = session_file_store_1.default(express_session_1.default);
+        const sqlStore = new MySQLStore({
+            host: '35.193.127.219',
+            user: 'root',
+            password: 'Jjang$194324',
+            database: 'sessions',
+        });
         this.app.use(express_session_1.default({
             genid: (req) => {
                 return v4_1.default(); // use UUIDs for session IDs
@@ -86,10 +93,9 @@ class ServerRouter {
             cookie: {
                 maxAge: 1000 * 60 * 60 // 1H expire time
             },
-            store: new fileSessionStore(),
+            store: sqlStore,
             secret: '1fe1cf8077ee4cceb346081743c3edad',
-            resave: false,
-            rolling: true,
+            resave: true,
             saveUninitialized: true
         }));
         // configure passport.js to use the local strategy
@@ -109,6 +115,7 @@ class ServerRouter {
             }
             else {
                 user = yield this.loginService.tryLogin({ email: email, password: password });
+                console.log(`user queried: ${JSON.stringify(user)}`);
             }
             if (user) {
                 done(null, user);
@@ -129,9 +136,10 @@ class ServerRouter {
     addLogoutRouter() {
         this.app.post('/logout', (req, res) => __awaiter(this, void 0, void 0, function* () {
             if (req.isAuthenticated()) {
+                console.log('logouted');
                 req.logout();
             }
-            res.sendStatus(401);
+            res.sendStatus(200);
         }));
     }
     addGetCategoriesRouter() {
@@ -221,6 +229,23 @@ class ServerRouter {
             }
         }));
     }
+    addAgreementRouter() {
+        this.app.post('/agree', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            console.log(`update agreement? ${req.isAuthenticated()}`);
+            if (req.isAuthenticated()) {
+                let result = yield this.loginService.updateAgreement(req.user.id);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(500);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
     addAuthrequiredRouter() {
         this.app.get('/authrequired', (req, res) => {
             console.log(`User authenticated? ${req.isAuthenticated()}`);
@@ -248,8 +273,10 @@ class ServerRouter {
     addLoginRouter() {
         this.app.post('/login', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             passport_1.default.authenticate('local', (err, user, info) => {
+                console.log(`login user info ${user}`);
                 req.login(user, (loginError) => {
                     if (req.session && req.user) {
+                        console.log(`login user info ${JSON.stringify(req.user)}`);
                         console.log('success login');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
                         res.type('json');

@@ -65,6 +65,12 @@ class LoginSerivce {
             }
         });
     }
+    updateAgreement(userid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.userDB.updateAgreement(userid);
+            return result;
+        });
+    }
     getUser(id) {
         return __awaiter(this, void 0, void 0, function* () {
             let result = yield this.userDB.getUser(id);

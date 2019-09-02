@@ -21,5 +21,8 @@ class UserDB {
     getValidAdminUser(userinfo, code) {
         return this.db.readValidAdminUser(userinfo.email, userinfo.password, code);
     }
+    updateAgreement(userid) {
+        return this.db.updateUserAgreement(userid);
+    }
 }
 exports.UserDB = UserDB;

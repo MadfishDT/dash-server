@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -17,20 +25,27 @@ class MySqlDB extends db_1.DB {
         if (MySqlDB.instance) {
             throw new Error('Error - use MySqlDB.getInstance()');
         }
-        /*  this.connection = mysql.createConnection({
-              host: 'localhost',
-              user: 'bulk',
-              password: 'jjang$194324',
-              database: 'users',
-              timezone: 'utc'
-          });*/
-        this.connection = mysql.createConnection({
-            host: '35.193.127.219',
-            user: 'root',
-            password: 'Jjang$194324',
-            database: 'users',
-            timezone: 'utc'
-        });
+        //console.log();
+        const runningMode = process.argv[2];
+        if (runningMode === 'dev') {
+            this.connection = mysql.createConnection({
+                host: 'localhost',
+                user: 'bulk',
+                password: 'jjang$194324',
+                database: 'users',
+                timezone: 'utc'
+            });
+        }
+        else {
+            console.log('runing my sql prod mode');
+            this.connection = mysql.createConnection({
+                host: '35.193.127.219',
+                user: 'root',
+                password: 'Jjang$194324',
+                database: 'users',
+                timezone: 'utc'
+            });
+        }
         this.initialize();
     }
     static getInstance() {
@@ -211,7 +226,7 @@ class MySqlDB extends db_1.DB {
     }
     readValidAdminUser(email, password, code) {
         return new Promise(resolve => {
-            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ci.name as cname `;
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.code='${code}' AND ui.company_code=ci.code LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
@@ -229,7 +244,8 @@ class MySqlDB extends db_1.DB {
                                 photo: results[0].photo,
                                 user_name: results[0].user_name,
                                 level: results[0].level,
-                                company_name: results[0].cname
+                                company_name: results[0].cname,
+                                agreement: results[0].agreement
                             };
                             resolve(userInDB);
                         }
@@ -245,12 +261,12 @@ class MySqlDB extends db_1.DB {
             });
         });
     }
-    readCategories() {
+    readCategoriesChild(parentID) {
+        const query = `SELECT * FROM categories WHERE child=1 AND parent_id=${parentID}`;
         return new Promise(resolve => {
-            const query = `SELECT * FROM categories WHERE child=0`;
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
-                    resolve(null);
+                    return null;
                 }
                 else {
                     if (results && results.length > 0) {
@@ -266,11 +282,38 @@ class MySqlDB extends db_1.DB {
                         }
                     }
                     else {
-                        console.log('not exist user profile');
                         resolve(null);
                     }
                 }
             });
+        });
+    }
+    readCategories() {
+        return new Promise(resolve => {
+            const query = `SELECT * FROM categories WHERE child=0`;
+            this.connection.query(query, (error, results) => __awaiter(this, void 0, void 0, function* () {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let categories = new Array();
+                        for (let item of results) {
+                            let children = yield this.readCategoriesChild(item.id);
+                            categories.push({ id: item.id, name: item.name, desc: item.desc, children: children });
+                        }
+                        if (categories.length > 0) {
+                            resolve(categories);
+                        }
+                        else {
+                            resolve(null);
+                        }
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            }));
         });
     }
     readUser(id) {
@@ -301,7 +344,8 @@ class MySqlDB extends db_1.DB {
                                 about: results[0].about,
                                 level: results[0].level,
                                 company_name: results[0].cname,
-                                company_code: results[0].company_code
+                                company_code: results[0].company_code,
+                                agreement: results[0].agreement
                             };
                             resolve(userProfileInDB);
                         }
@@ -317,9 +361,25 @@ class MySqlDB extends db_1.DB {
             });
         });
     }
+    updateUserAgreement(uid) {
+        console.log('update agreement');
+        return new Promise((resolve) => {
+            const query = `UPDATE user_info SET agreement='1' WHERE id='${uid}'`;
+            console.log(`update agreement query is ${query}`);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    console.log(error);
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
     readValidUser(email, password) {
         return new Promise(resolve => {
-            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ci.name as cname `;
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.company_code=ci.code LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
@@ -337,7 +397,8 @@ class MySqlDB extends db_1.DB {
                                 photo: results[0].photo,
                                 user_name: results[0].user_name,
                                 level: results[0].level,
-                                company_name: results[0].cname
+                                company_name: results[0].cname,
+                                agreement: results[0].agreement
                             };
                             resolve(userInDB);
                         }
