@@ -102,7 +102,7 @@ export class ServerRouter {
         },
         store: sqlStore,
         secret: '1fe1cf8077ee4cceb346081743c3edad',
-        resave: false,
+        resave: true,
         saveUninitialized: true
     }));
         // configure passport.js to use the local strategy
@@ -122,7 +122,9 @@ export class ServerRouter {
                     user = await this.loginService.tryAdminLogin({email: email, password: password}, code);
                 }
             } else {
+                
                 user = await this.loginService.tryLogin({email: email, password: password});
+                console.log(`user queried: ${JSON.stringify(user)}`);
             }
             if(user) {
                 done(null, user);
@@ -148,9 +150,10 @@ export class ServerRouter {
 
         this.app.post('/logout', async (req, res) => {
             if(req.isAuthenticated()) {
+                console.log('logouted');
                 req.logout();
             }
-            res.sendStatus(401); 
+            res.sendStatus(200); 
         });
     }
 
@@ -280,8 +283,10 @@ export class ServerRouter {
     public addLoginRouter() : void {
         this.app.post('/login', async (req, res, next) => {
             passport.authenticate('local', (err, user, info) => {
+                console.log(`login user info ${user}`);
                 req.login(user, (loginError: any) => {
                     if (req.session && req.user) {
+                        console.log(`login user info ${JSON.stringify(req.user)}`);
                         console.log('success login');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
                         res.type('json');
