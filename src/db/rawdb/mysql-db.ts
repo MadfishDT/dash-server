@@ -1,4 +1,4 @@
-import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers } from '../dto/datadef'
+import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers, ICompany } from '../dto/datadef'
 import { DB } from './db';
 import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
@@ -189,7 +189,33 @@ export class MySqlDB extends DB {
         }
         return code;
     }
-
+    public readCompanys(): Promise< ICompany[] | null > {
+        return new Promise<Array<ICompany> | null>(resolve => {
+            const query = `SELECT * FROM company_info`;
+            this.connection.query(query,
+                (error, results, fields) => {
+                    if (error) {
+                        resolve(null);
+                    } else {
+                        if (results && results.length > 0) {
+                            let questions = new Array<ICompany>();
+                            results.forEach((item: any) => {
+                                questions.push({ id: item.id,
+                                     code: item.code, name: item.name, desc: item.desc });
+                            });
+                            if (questions.length > 0) {
+                                resolve(questions);
+                            } else {
+                                resolve(null);
+                            }
+                        } else {
+                            console.log('not exist user profile');
+                            resolve(null);
+                        }
+                    }
+                });
+        });
+    }
     public readQuestions(categoryid: number): Promise<Array<IQuestions> | null> {
         return new Promise<Array<IQuestions> | null>(resolve => {
             const query = `SELECT * FROM questions WHERE category_id='${categoryid}' ORDER BY 'order' DESC`;

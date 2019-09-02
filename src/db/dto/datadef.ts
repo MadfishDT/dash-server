@@ -49,3 +49,10 @@ export interface IAnswers {
     category_id: number;
     answers: any
 }
+
+export interface ICompany {
+    id: number;
+    code: string;
+    name: string;
+    desc: string;
+}

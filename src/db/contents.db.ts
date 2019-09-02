@@ -1,4 +1,4 @@
-import { DB, MySqlDB, ICategory, IQuestions } from './rawdb/dbs';
+import { DB, MySqlDB, ICategory, IQuestions, ICompany } from './rawdb/dbs';
 import { IAnswers } from './dto/datadef';
 
 export class ContentsDB {
@@ -36,5 +36,9 @@ export class ContentsDB {
 
     public pushAnswersConfirm(userid: string, categorid: number, jsonData: any): Promise<boolean> {
         return this.db.writeAnswersConfirm(userid, categorid, jsonData);
+    }
+
+    public getCompanys(): Promise<ICompany[] | null> {
+        return this.db.readCompanys();
     }
 }
