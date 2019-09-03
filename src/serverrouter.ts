@@ -103,8 +103,9 @@ export class ServerRouter {
             },
             store: sqlStore,
             secret: '1fe1cf8077ee4cceb346081743c3edad',
-            resave: false,
-            saveUninitialized: true
+            resave: true,
+            rolling: true,
+            saveUninitialized: false
         }));
         // configure passport.js to use the local strategy
         passport.use(new LocalStrategy.Strategy(
