@@ -73,6 +73,7 @@ class ServerRouter {
             this.addGetAnswersRouter();
             this.addAnswerRouter();
             this.addAgreementRouter();
+            this.addGetCompanysRouter();
             return true;
         }
         catch (e) {
@@ -95,7 +96,7 @@ class ServerRouter {
             },
             store: sqlStore,
             secret: '1fe1cf8077ee4cceb346081743c3edad',
-            resave: true,
+            resave: false,
             saveUninitialized: true
         }));
         // configure passport.js to use the local strategy
@@ -152,7 +153,12 @@ class ServerRouter {
                         res.json(result);
                     }
                     else {
-                        res.sendStatus(404);
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        }
+                        else {
+                            res.sendStatus(404);
+                        }
                     }
                 }
                 else {
@@ -207,6 +213,18 @@ class ServerRouter {
                 else {
                     res.sendStatus(401);
                 }
+            }
+        }));
+    }
+    addGetCompanysRouter() {
+        this.app.get('/comp', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            let companys = yield this.contentService.getCompanys();
+            console.log(`request user profile is: ${JSON.stringify(companys)}`);
+            if (companys) {
+                res.json(companys);
+            }
+            else {
+                res.sendStatus(204); // not found user reponse
             }
         }));
     }

@@ -27,5 +27,8 @@ class ContentsDB {
     pushAnswersConfirm(userid, categorid, jsonData) {
         return this.db.writeAnswersConfirm(userid, categorid, jsonData);
     }
+    getCompanys() {
+        return this.db.readCompanys();
+    }
 }
 exports.ContentsDB = ContentsDB;

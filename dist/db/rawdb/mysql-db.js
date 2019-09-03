@@ -196,6 +196,35 @@ class MySqlDB extends db_1.DB {
         }
         return code;
     }
+    readCompanys() {
+        return new Promise(resolve => {
+            const query = `SELECT * FROM company_info`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let questions = new Array();
+                        results.forEach((item) => {
+                            questions.push({ id: item.id,
+                                code: item.code, name: item.name, desc: item.desc });
+                        });
+                        if (questions.length > 0) {
+                            resolve(questions);
+                        }
+                        else {
+                            resolve(null);
+                        }
+                    }
+                    else {
+                        console.log('not exist user profile');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
     readQuestions(categoryid) {
         return new Promise(resolve => {
             const query = `SELECT * FROM questions WHERE category_id='${categoryid}' ORDER BY 'order' DESC`;

@@ -57,5 +57,11 @@ class ContentsService {
             return result;
         });
     }
+    getCompanys() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = yield this.contentsDB.getCompanys();
+            return result;
+        });
+    }
 }
 exports.ContentsService = ContentsService;
