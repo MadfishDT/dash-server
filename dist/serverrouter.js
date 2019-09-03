@@ -92,7 +92,7 @@ class ServerRouter {
                 return v4_1.default(); // use UUIDs for session IDs
             },
             cookie: {
-                maxAge: 1000 * 60 * 60 // 1H expire time
+                maxAge: 1000 * 60 * 10 // 10 min expire time
             },
             store: sqlStore,
             secret: '1fe1cf8077ee4cceb346081743c3edad',
