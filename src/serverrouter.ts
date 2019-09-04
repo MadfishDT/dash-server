@@ -126,7 +126,6 @@ export class ServerRouter {
                 } else {
 
                     user = await this.loginService.tryLogin({ email: email, password: password });
-                    console.log(`user queried: ${JSON.stringify(user)}`);
                 }
                 if (user) {
                     done(null, user);
@@ -232,7 +231,6 @@ export class ServerRouter {
         this.app.get('/comp', async (req, res) => {
           
                 let companys = await this.contentService.getCompanys()
-                console.log(`request user profile is: ${JSON.stringify(companys)}`);
                 if (companys) {
                     res.json(companys);
                 } else {
@@ -246,7 +244,6 @@ export class ServerRouter {
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     let userProfile = await this.loginService.getUser(req.user.id);
-                    console.log(`request user profile is: ${JSON.stringify(userProfile)}`);
                     if (userProfile) {
                         res.json(userProfile);
                     } else {
@@ -303,10 +300,8 @@ export class ServerRouter {
     public addLoginRouter(): void {
         this.app.post('/login', async (req, res, next) => {
             passport.authenticate('local', (err, user, info) => {
-                console.log(`login user info ${user}`);
                 req.login(user, (loginError: any) => {
                     if (req.session && req.user) {
-                        console.log(`login user info ${JSON.stringify(req.user)}`);
                         console.log('success login');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
                         res.type('json');

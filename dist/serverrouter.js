@@ -117,7 +117,6 @@ class ServerRouter {
             }
             else {
                 user = yield this.loginService.tryLogin({ email: email, password: password });
-                console.log(`user queried: ${JSON.stringify(user)}`);
             }
             if (user) {
                 done(null, user);
@@ -220,7 +219,6 @@ class ServerRouter {
     addGetCompanysRouter() {
         this.app.get('/comp', (req, res) => __awaiter(this, void 0, void 0, function* () {
             let companys = yield this.contentService.getCompanys();
-            console.log(`request user profile is: ${JSON.stringify(companys)}`);
             if (companys) {
                 res.json(companys);
             }
@@ -234,7 +232,6 @@ class ServerRouter {
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     let userProfile = yield this.loginService.getUser(req.user.id);
-                    console.log(`request user profile is: ${JSON.stringify(userProfile)}`);
                     if (userProfile) {
                         res.json(userProfile);
                     }
@@ -292,10 +289,8 @@ class ServerRouter {
     addLoginRouter() {
         this.app.post('/login', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             passport_1.default.authenticate('local', (err, user, info) => {
-                console.log(`login user info ${user}`);
                 req.login(user, (loginError) => {
                     if (req.session && req.user) {
-                        console.log(`login user info ${JSON.stringify(req.user)}`);
                         console.log('success login');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
                         res.type('json');

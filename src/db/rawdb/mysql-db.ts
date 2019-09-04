@@ -6,7 +6,7 @@ import { createConnection } from 'net';
 
 export class MySqlDB extends DB {
 
-    private connection: mysql.Connection;
+    private connection: mysql.Pool;
     private generators: Gernerators;
 
     constructor() {
@@ -17,24 +17,44 @@ export class MySqlDB extends DB {
         }
         //console.log();
         const runningMode = process.argv[2];
+
         if(runningMode === 'dev') {
-            this.connection = mysql.createConnection({
+            this.connection = mysql.createPool({
                 host: 'localhost',
+                port : 3306,
                 user: 'bulk',
                 password: 'jjang$194324',
                 database: 'users',
+                connectionLimit:10,
+                waitForConnections: true,
                 timezone: 'utc'
             });
         } else {
             console.log('runing my sql prod mode');
-            this.connection = mysql.createConnection({
+            this.connection = mysql.createPool({
                 host: '35.193.127.219',
+                port : 3306,
                 user: 'root',
                 password: 'Jjang$194324',
                 database: 'users',
+                connectionLimit:220,
+                waitForConnections: true,
                 timezone: 'utc'
             });
         }
+
+        this.connection.on('error', (err) => {
+            console.log('connection pool error');
+        });
+
+        this.connection.on('connection',  (connection) => {
+            console.log('connection create');
+        });
+
+        this.connection.on('enqueue', () => {
+            console.log('connection enqueue');
+        });
+
         this.initialize();
     }
 
@@ -47,7 +67,7 @@ export class MySqlDB extends DB {
 
     public initialize(): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
-            this.connection.connect(error => {
+         /*   this.connection.connect(error => {
                 if (error) {
                     console.log(`my sql database initialize fail: ${error}`);
                     resolve(false);
@@ -55,7 +75,8 @@ export class MySqlDB extends DB {
                     console.log(`my sql database initialize success`);
                     resolve(true);
                 }
-            });
+            });*/
+            resolve(true);
         });
     }
 
@@ -89,7 +110,6 @@ export class MySqlDB extends DB {
             `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` + 
             `'${userid}', '${categorid}')`;
             this.connection.query(commentQuery, (commenterror) => {
-                console.log(`writeAnswers query ${commenterror}`);
                 if(commenterror) {
                     resolve(false);
                 } else {
