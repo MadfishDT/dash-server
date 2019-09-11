@@ -43,6 +43,12 @@ export interface IQuestions {
     order: number
 }
 
+export interface ICQuestions {
+    id: number;
+    data: any;
+    revision: number
+}
+
 export interface IAnswers {
     uid: number;
     user_id: string;

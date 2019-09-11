@@ -109,6 +109,7 @@ class MySqlDB extends db_1.DB {
                 `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
                 `'${userid}', '${categorid}')`;
             this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
                 if (commenterror) {
                     resolve(false);
                 }
@@ -267,18 +268,85 @@ class MySqlDB extends db_1.DB {
             });
         });
     }
-    readValidAdminUser(email, password, code) {
+    readCQuestion(categoriId) {
         return new Promise(resolve => {
-            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
-            query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
-            query += `AND ui.password='${password}' AND ui.code='${code}' AND ui.company_code=ci.code LIMIT 1`;
-            this.connection.query(query, (error, results, fields) => {
+            const query = `SELECT * FROM cquestions WHERE category_id='${categoriId}' ORDER BY 'revision' ASC`;
+            this.connection.query(query, (error, results) => {
                 if (error) {
                     resolve(null);
                 }
                 else {
                     if (results && results.length > 0) {
-                        if (results[0].level <= 0) {
+                        let cquestion;
+                        cquestion = {
+                            data: results[0].data,
+                            id: results[0].id,
+                            revision: results[0].revision
+                        };
+                    }
+                    else {
+                        console.log('not exist user profile');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+    readCQuestionRevision(categoriId, revison) {
+        return new Promise(resolve => {
+            const query = `SELECT * FROM cquestions WHERE category_id='${categoriId} AND revision=${revison}' ORDER BY 'revision' ASC`;
+            this.connection.query(query, (error, results) => {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let cquestion;
+                        cquestion = {
+                            data: results[0].data,
+                            id: results[0].id,
+                            revision: results[0].revision
+                        };
+                    }
+                    else {
+                        console.log('not exist user profile');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+    writetCQuestion(categoriId, companyid, jsonData) {
+        console.log(`CQuestions ${categoriId}-${companyid}`);
+        return new Promise((resolve) => {
+            let cQuestionsQuery = `INSERT INTO cquestion(category_id, company_id, data) ` +
+                `VALUES('${categoriId}', '${companyid}', '${this.convItToTextCode(JSON.stringify(jsonData))}'`;
+            this.connection.query(cQuestionsQuery, (error) => {
+                console.log(`writeAnswers query ${error}`);
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    readValidAdminUser(email, password, code) {
+        console.log('admin user query start');
+        return new Promise(resolve => {
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
+            query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
+            query += `AND ui.password='${password}' AND ui.company_code=ci.code AND ui.code='${code}' LIMIT 1`;
+            console.log(`readValidAdminUser: ${query}`);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    console.log(error);
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        if (results[0].level >= 1) {
                             let userInDB = null;
                             userInDB = {
                                 email: results[0].email,
@@ -290,6 +358,7 @@ class MySqlDB extends db_1.DB {
                                 company_name: results[0].cname,
                                 agreement: results[0].agreement
                             };
+                            console.log(`admin login success ${results[0].photo}`);
                             resolve(userInDB);
                         }
                         else {

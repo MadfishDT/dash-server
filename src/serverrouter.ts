@@ -80,6 +80,7 @@ export class ServerRouter {
             this.addAnswerRouter();
             this.addAgreementRouter();
             this.addGetCompanysRouter();
+            this.addGetCQuestionsRouter();
             return true;
         } catch (e) {
             return false;
@@ -121,6 +122,7 @@ export class ServerRouter {
                 if (authTypeHeader === 'admin') {
                     code = req.body.code;
                     if (code) {
+                        console.log(`admin login try ${email}-${password}-${code}`);
                         user = await this.loginService.tryAdminLogin({ email: email, password: password }, code);
                     }
                 } else {
@@ -201,7 +203,33 @@ export class ServerRouter {
             }
         });
     }
+    public addInsertCQuestionsRouter(): void {
 
+    }
+
+    public addGetCQuestionsRouter(): void {
+        this.app.get('/cquestions', async (req, res) => {
+            console.log('readcQuestions');
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    if (req.query.id) {
+                        let id = parseInt(req.query.id, 10);
+                        let result = await this.contentService.getQuestions(id);
+                        if (result && result.length > 0) {
+                            res.json(result);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    } else {
+                        res.sendStatus(400);
+                    }
+
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        })
+    }
     public addGetQuestionsRouter(): void {
         this.app.get('/questions', async (req, res) => {
             console.log('readQuestions');

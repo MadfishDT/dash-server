@@ -30,5 +30,14 @@ class ContentsDB {
     getCompanys() {
         return this.db.readCompanys();
     }
+    getCQuestion(id) {
+        return this.db.readCQuestion(id);
+    }
+    getCQuestionRevision(id, revision) {
+        return this.db.readCQuestionRevision(id, revision);
+    }
+    pushCQuestions(categorid, companyID, data) {
+        return this.db.writetCQuestion(categorid, companyID, data);
+    }
 }
 exports.ContentsDB = ContentsDB;

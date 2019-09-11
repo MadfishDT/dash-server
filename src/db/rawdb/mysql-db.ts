@@ -1,4 +1,4 @@
-import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers, ICompany } from '../dto/datadef'
+import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers, ICompany, ICQuestions } from '../dto/datadef'
 import { DB } from './db';
 import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
@@ -54,7 +54,7 @@ export class MySqlDB extends DB {
         this.connection.on('enqueue', () => {
             console.log('connection enqueue');
         });
-
+        
         this.initialize();
     }
 
@@ -110,6 +110,7 @@ export class MySqlDB extends DB {
             `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` + 
             `'${userid}', '${categorid}')`;
             this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
                 if(commenterror) {
                     resolve(false);
                 } else {
@@ -263,39 +264,106 @@ export class MySqlDB extends DB {
         });
     }
 
-    public readValidAdminUser(email: string, password: string | undefined, code: number): Promise<IUserInfo | null> {
-        return new Promise<IUserInfo | null>(resolve => {
-            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
-            query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
-            query += `AND ui.password='${password}' AND ui.code='${code}' AND ui.company_code=ci.code LIMIT 1`;
+    public readCQuestion(categoriId: number): Promise< ICQuestions | null> {
+        return new Promise< ICQuestions | null>(resolve => {
+            const query = `SELECT * FROM cquestions WHERE category_id='${categoriId}' ORDER BY 'revision' ASC`;
             this.connection.query(query,
-                (error, results, fields) => {
+                (error, results) => {
                     if (error) {
                         resolve(null);
                     } else {
                         if (results && results.length > 0) {
-                            if (results[0].level <= 0) {
-                                let userInDB: IUserInfo | null = null;
-                                userInDB = {
-                                    email: results[0].email,
-                                    id: results[0].id,
-                                    password: '',
-                                    photo: results[0].photo,
-                                    user_name: results[0].user_name,
-                                    level: results[0].level,
-                                    company_name: results[0].cname,
-                                    agreement: results[0].agreement
-                                };
-                                resolve(userInDB);
-                            } else {
-                                resolve(null);
-                            }
+                            let cquestion: ICQuestions;
+                            cquestion = { 
+                                data: results[0].data,
+                                id: results[0].id,
+                                revision: results[0].revision}                       
                         } else {
-                            console.log('not exist user');
+                            console.log('not exist user profile');
                             resolve(null);
                         }
                     }
                 });
+        });
+    }
+
+    public readCQuestionRevision(categoriId: number, revison: number): Promise< ICQuestions | null >{
+        return new Promise< ICQuestions | null>(resolve => {
+            const query = `SELECT * FROM cquestions WHERE category_id='${categoriId} AND revision=${revison}' ORDER BY 'revision' ASC`;
+            this.connection.query(query,
+                (error, results) => {
+                    if (error) {
+                        resolve(null);
+                    } else {
+                        if (results && results.length > 0) {
+                            let cquestion: ICQuestions;
+                            cquestion = { 
+                                data: results[0].data,
+                                id: results[0].id,
+                                revision: results[0].revision}                       
+                        } else {
+                            console.log('not exist user profile');
+                            resolve(null);
+                        }
+                    }
+                });
+        });
+    }
+
+    public writetCQuestion(categoriId: number, companyid: number, jsonData: number): Promise< boolean >{
+        console.log(`CQuestions ${categoriId}-${companyid}`);
+        return new Promise<boolean>( (resolve) => {
+            
+            let cQuestionsQuery = `INSERT INTO cquestion(category_id, company_id, data) `+
+            `VALUES('${categoriId}', '${companyid}', '${this.convItToTextCode(JSON.stringify(jsonData))}'`
+
+            this.connection.query(cQuestionsQuery, (error) => {
+                console.log(`writeAnswers query ${error}`);
+                if(error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+           });
+        });
+    }
+    
+    public readValidAdminUser(email: string, password: string | undefined, code: number): Promise<IUserInfo | null> {
+        console.log('admin user query start');
+        return new Promise<IUserInfo | null>(resolve => {
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
+            query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
+            query += `AND ui.password='${password}' AND ui.company_code=ci.code AND ui.code='${code}' LIMIT 1`;
+            console.log(`readValidAdminUser: ${query}`);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    console.log(error);
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        if (results[0].level >= 1) {
+                            let userInDB: IUserInfo | null = null;
+                            userInDB = {
+                                email: results[0].email,
+                                id: results[0].id,
+                                password: '',
+                                photo: results[0].photo,
+                                user_name: results[0].user_name,
+                                level: results[0].level,
+                                company_name: results[0].cname,
+                                agreement: results[0].agreement
+                            };
+                            console.log(`admin login success ${results[0].photo}`);
+                            resolve(userInDB);
+                        } else {
+                            resolve(null);
+                        }
+                    } else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
+                }
+            });
         });
     }
     public readCategoriesChild(parentID: number): Promise<Array<ICategory> | null> {

@@ -74,6 +74,7 @@ class ServerRouter {
             this.addAnswerRouter();
             this.addAgreementRouter();
             this.addGetCompanysRouter();
+            this.addGetCQuestionsRouter();
             return true;
         }
         catch (e) {
@@ -112,6 +113,7 @@ class ServerRouter {
             if (authTypeHeader === 'admin') {
                 code = req.body.code;
                 if (code) {
+                    console.log(`admin login try ${email}-${password}-${code}`);
                     user = yield this.loginService.tryAdminLogin({ email: email, password: password }, code);
                 }
             }
@@ -175,6 +177,33 @@ class ServerRouter {
                     if (req.query.id) {
                         let result = yield this.contentService.getAnswers(req.query.id);
                         if (result) {
+                            res.json(result);
+                        }
+                        else {
+                            res.sendStatus(404);
+                        }
+                    }
+                    else {
+                        res.sendStatus(400);
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        }));
+    }
+    addInsertCQuestionsRouter() {
+    }
+    addGetCQuestionsRouter() {
+        this.app.get('/cquestions', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            console.log('readcQuestions');
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    if (req.query.id) {
+                        let id = parseInt(req.query.id, 10);
+                        let result = yield this.contentService.getQuestions(id);
+                        if (result && result.length > 0) {
                             res.json(result);
                         }
                         else {

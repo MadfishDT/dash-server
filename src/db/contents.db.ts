@@ -1,4 +1,4 @@
-import { DB, MySqlDB, ICategory, IQuestions, ICompany } from './rawdb/dbs';
+import { DB, MySqlDB, ICategory, IQuestions, ICompany, ICQuestions } from './rawdb/dbs';
 import { IAnswers } from './dto/datadef';
 
 export class ContentsDB {
@@ -40,5 +40,17 @@ export class ContentsDB {
 
     public getCompanys(): Promise<ICompany[] | null> {
         return this.db.readCompanys();
+    }
+    
+    public getCQuestion(id: number): Promise< ICQuestions | null > {
+        return this.db.readCQuestion(id);
+    }
+
+    public getCQuestionRevision(id: number, revision: number): Promise< ICQuestions | null > {
+        return this.db.readCQuestionRevision(id, revision);
+    }
+
+    public pushCQuestions(categorid: number, companyID: number, data: any): Promise<boolean> {
+        return this.db.writetCQuestion(categorid, companyID, data);
     }
 }
