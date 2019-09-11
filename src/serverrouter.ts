@@ -100,7 +100,7 @@ export class ServerRouter {
                 return uuid() // use UUIDs for session IDs
             },
             cookie: {
-                maxAge: 1000 * 60 * 10 // 10 min expire time
+                maxAge: 1000 * 60 * 30 // 10 min expire time
             },
             store: sqlStore,
             secret: '1fe1cf8077ee4cceb346081743c3edad',
