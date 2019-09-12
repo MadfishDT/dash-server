@@ -88,10 +88,11 @@ export class ServerRouter {
     }
 
     private addSessionRouter(): void {
+
         const sqlStore = new MySQLStore({
-            host: '35.193.127.219',
+            host: '125.177.65.248',
             user: 'root',
-            password: 'Jjang$194324',
+            password: 'Jjang07',
             database: 'sessions',
         });
 
