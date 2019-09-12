@@ -45,7 +45,7 @@ class MySqlDB extends db_1.DB {
                 host: '35.193.127.219',
                 port: 3306,
                 user: 'root',
-                password: 'Jjang07',
+                password: 'Jjang$194324',
                 database: 'users',
                 connectionLimit: 220,
                 waitForConnections: true,
