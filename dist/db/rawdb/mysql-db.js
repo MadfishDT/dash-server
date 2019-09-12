@@ -29,12 +29,12 @@ class MySqlDB extends db_1.DB {
         const runningMode = process.argv[2];
         if (runningMode === 'dev') {
             this.connection = mysql.createPool({
-                host: 'localhost',
+                host: '35.193.127.219',
                 port: 3306,
-                user: 'bulk',
-                password: 'jjang$194324',
+                user: 'root',
+                password: 'Jjang$194324',
                 database: 'users',
-                connectionLimit: 10,
+                connectionLimit: 220,
                 waitForConnections: true,
                 timezone: 'utc'
             });
@@ -42,10 +42,10 @@ class MySqlDB extends db_1.DB {
         else {
             console.log('runing my sql prod mode');
             this.connection = mysql.createPool({
-                host: '35.193.127.219',
+                host: 'localhost',
                 port: 3306,
                 user: 'root',
-                password: 'Jjang$194324',
+                password: 'Jjang$07',
                 database: 'users',
                 connectionLimit: 220,
                 waitForConnections: true,
