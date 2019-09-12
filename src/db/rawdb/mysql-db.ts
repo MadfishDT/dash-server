@@ -18,7 +18,7 @@ export class MySqlDB extends DB {
         //console.log();
         const runningMode = process.argv[2];
 
-        if(runningMode === 'dev') {
+      if(runningMode === 'dev') {
             this.connection = mysql.createPool({
                 host: '35.193.127.219',
                 port : 3306,
@@ -30,9 +30,9 @@ export class MySqlDB extends DB {
                 timezone: 'utc'
             });
         } else {
-            console.log('runing my sql prod mode');
+            console.log('runing my sql 2 prod mode');
             this.connection = mysql.createPool({
-                host: 'localhost',
+                host: '125.177.65.248',
                 port : 3306,
                 user: 'root',
                 password: 'Jjang07',

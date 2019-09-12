@@ -40,9 +40,9 @@ class MySqlDB extends db_1.DB {
             });
         }
         else {
-            console.log('runing my sql prod mode');
+            console.log('runing my sql 2 prod mode');
             this.connection = mysql.createPool({
-                host: 'localhost',
+                host: '125.177.65.248',
                 port: 3306,
                 user: 'root',
                 password: 'Jjang07',
