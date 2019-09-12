@@ -24,7 +24,7 @@ const responseResultCode = {
 }
 
 const corsOptions = {
-    'origin': ['http://localhost:8080', 'http://localhost:8081',
+    'origin': ['http://localhost:8080', 'http://localhost:8081', 'http://qesg-dev.ddns.net:8080', 'http://qesg-dev.ddns.net:80',
         'http://localhost:8082', 'http://35.193.127.219:8080'],
     'methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
     'preflightContinue': false,
@@ -122,7 +122,6 @@ export class ServerRouter {
                 if (authTypeHeader === 'admin') {
                     code = req.body.code;
                     if (code) {
-                        console.log(`admin login try ${email}-${password}-${code}`);
                         user = await this.loginService.tryAdminLogin({ email: email, password: password }, code);
                     }
                 } else {

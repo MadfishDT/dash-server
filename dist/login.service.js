@@ -74,17 +74,14 @@ class LoginSerivce {
     getUser(id) {
         return __awaiter(this, void 0, void 0, function* () {
             let result = yield this.userDB.getUser(id);
-            console.log(result);
             return result;
         });
     }
     tryAdminLogin(info, code) {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(`admin login try ${code}`);
                 let result = yield this.userDB.getValidAdminUser(info, code);
                 if (result) {
-                    console.log(`success find user: ${result}`);
                     resolve(result);
                     return;
                 }
@@ -104,7 +101,6 @@ class LoginSerivce {
             try {
                 let result = yield this.userDB.getValidUser(info);
                 if (result) {
-                    console.log(`success find user: ${result}`);
                     resolve(result);
                     return;
                 }

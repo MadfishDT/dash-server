@@ -59,7 +59,6 @@ export class LoginSerivce {
         });
     }
     public tryLogin(info : IUserInfo) : Promise<IUserInfo | null> {
-        console.log(`request user login ${JSON.stringify(info)}`);
         return new Promise<IUserInfo | null>( async (resolve) => {
             try {
                 let result = await this.userDB.getValidUser(info);

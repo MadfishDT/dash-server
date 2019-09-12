@@ -67,17 +67,14 @@ export class LoginSerivce {
     }
     public async getUser(id: string) : Promise<IUserProfile | null> {
         let result = await this.userDB.getUser(id);
-        console.log(result);
         return result;
     }
 
     public tryAdminLogin(info : IUserInfo, code: number) : Promise<IUserInfo | null> {
         return new Promise<IUserInfo | null>( async (resolve) => {
             try {
-                console.log(`admin login try ${code}`);
                 let result = await this.userDB.getValidAdminUser(info, code);
                 if(result) {
-                    console.log(`success find user: ${result}`);
                     resolve(result);
                     return;
                 } else {
@@ -97,7 +94,6 @@ export class LoginSerivce {
             try {
                 let result = await this.userDB.getValidUser(info);
                 if(result) {
-                    console.log(`success find user: ${result}`);
                     resolve(result);
                     return;
                 } else {

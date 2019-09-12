@@ -66,7 +66,6 @@ class LoginSerivce {
         });
     }
     tryLogin(info) {
-        console.log(`request user login ${JSON.stringify(info)}`);
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let result = yield this.userDB.getValidUser(info);
