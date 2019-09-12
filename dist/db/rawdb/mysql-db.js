@@ -42,7 +42,7 @@ class MySqlDB extends db_1.DB {
         else {
             console.log('runing my sql prod mode');
             this.connection = mysql.createPool({
-                host: 'localhost',
+                host: '127.0.0.1',
                 port: 3306,
                 user: 'root',
                 password: 'Jjang$07',
