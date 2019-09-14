@@ -26,7 +26,9 @@ export class LoginSerivce {
         await this.tryLogin(info);
         })
     }
-    
+    public get sessionDBOptions(): any {
+        return this.userDB.sessionDBOptions();
+    }
     public extentdToken(token : string) : boolean {
         let findToken = this.validTokens.get(token);
         if(findToken) {

@@ -18,8 +18,8 @@ export class ContentsDB {
         return ContentsDB.instance;
     }
 
-    public getCategories(): Promise<ICategory[] | null> {
-        return this.db.readCategories();
+    public getCategories(companyCode: string): Promise<ICategory[] | null> {
+        return this.db.readCategories(companyCode);
     }
 
     public getQuestions(id: number): Promise< Array<IQuestions> | null > {
@@ -50,7 +50,7 @@ export class ContentsDB {
         return this.db.readCQuestionRevision(id, revision);
     }
 
-    public pushCQuestions(categorid: number, companyID: number, data: any): Promise<boolean> {
-        return this.db.writetCQuestion(categorid, companyID, data);
+    public pushCQuestions(categorid: number, data: any): Promise<boolean> {
+        return this.db.writetCQuestion(categorid, data);
     }
 }

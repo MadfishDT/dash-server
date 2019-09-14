@@ -1,6 +1,6 @@
 import { Gernerators } from './generators'
 import { ContentsDB} from './db/contents.db';
-import { ICategory, IQuestions, IAnswers, ICompany } from './db/dto/datadef';
+import { ICategory, IQuestions, IAnswers, ICompany, ICQuestions } from './db/dto/datadef';
 import * as fs from 'fs';
 import * as rx from 'rx';
 import { stringify } from 'querystring';
@@ -21,8 +21,8 @@ export class ContentsService {
         this.contentsDB = ContentsDB.getInstance();
     }
     
-    public async getCategories(): Promise<ICategory[] | null> {
-        let result = await this.contentsDB.getCategories();
+    public async getCategories(companyCode: string): Promise<ICategory[] | null> {
+        let result = await this.contentsDB.getCategories(companyCode);
         return result;
     }
 
@@ -47,4 +47,17 @@ export class ContentsService {
         let result  = await this.contentsDB.getCompanys();
         return result;
     }
+
+    public async getCQuestion(id: number): Promise< ICQuestions | null > {
+        return this.contentsDB.getCQuestion(id);
+    }
+
+    public async getCQuestionRevision(id: number, revision: number): Promise< ICQuestions | null > {
+        return this.contentsDB.getCQuestionRevision(id, revision);
+    }
+
+    public async  pushCQuestions(categorid: number, data: any): Promise<boolean> {
+        return this.contentsDB.pushCQuestions(categorid, data);
+    }
+
 }

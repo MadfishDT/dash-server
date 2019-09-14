@@ -9,7 +9,8 @@ import uuid from 'uuid/v4';
 import { IUserInfo } from './db/rawdb/dbs';
 import { ResponseUtils } from './response';
 import { ContentsService } from './content.service';
-const MySQLStore = require('express-mysql-session')(session);
+
+const sqlSessionStore = require('express-mysql-session')(session);
 
 const responseResultCode = {
     NOTEXISTUSER: 1,
@@ -81,6 +82,7 @@ export class ServerRouter {
             this.addAgreementRouter();
             this.addGetCompanysRouter();
             this.addGetCQuestionsRouter();
+            this.addCQuestionsCreateRouter();
             return true;
         } catch (e) {
             return false;
@@ -88,13 +90,10 @@ export class ServerRouter {
     }
 
     private addSessionRouter(): void {
-
-        const sqlStore = new MySQLStore({
-            host: '125.177.65.248',
-            user: 'root',
-            password: 'Jjang07',
-            database: 'sessions',
-        });
+        
+        const sqlStore = new sqlSessionStore (
+            this.loginService.sessionDBOptions
+        );
 
         this.app.use(session({
             genid: (req) => {
@@ -165,7 +164,7 @@ export class ServerRouter {
             console.log('catagories');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
-                    let result = await this.contentService.getCategories();
+                    let result = await this.contentService.getCategories(req.user.company_code);
                     if (result && result.length > 0) {
                         res.json(result);
                     } else {
@@ -203,8 +202,21 @@ export class ServerRouter {
             }
         });
     }
-    public addInsertCQuestionsRouter(): void {
 
+    public addCQuestionsCreateRouter(): void {
+        
+        this.app.post('/wcqustions', async (req, res, next) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = await this.contentService.pushCQuestions(req.body.cid, req.body.data);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
     }
 
     public addGetCQuestionsRouter(): void {
@@ -214,8 +226,8 @@ export class ServerRouter {
                 if (req.session && req.user) {
                     if (req.query.id) {
                         let id = parseInt(req.query.id, 10);
-                        let result = await this.contentService.getQuestions(id);
-                        if (result && result.length > 0) {
+                        let result = await this.contentService.getCQuestion(id);
+                        if (result) {
                             res.json(result);
                         } else {
                             res.sendStatus(404);
@@ -230,6 +242,7 @@ export class ServerRouter {
             }
         })
     }
+
     public addGetQuestionsRouter(): void {
         this.app.get('/questions', async (req, res) => {
             console.log('readQuestions');

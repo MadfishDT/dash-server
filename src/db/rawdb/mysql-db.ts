@@ -8,7 +8,7 @@ export class MySqlDB extends DB {
 
     private connection: mysql.Pool;
     private generators: Gernerators;
-
+    private sessionDBOptions: any;
     constructor() {
         super();
         this.generators = Gernerators.bootstrap();
@@ -18,43 +18,38 @@ export class MySqlDB extends DB {
         //console.log();
         const runningMode = process.argv[2];
 
-      if(runningMode === 'dev') {
-            this.connection = mysql.createPool({
-                host: '35.193.127.219',
-                port : 3306,
-                user: 'root',
-                password: 'Jjang$194324',
-                database: 'users',
-                connectionLimit:220,
-                waitForConnections: true,
-                timezone: 'utc'
-            });
-        } else {
-            console.log('runing my sql 2 prod mode');
-            this.connection = mysql.createPool({
-                host: '35.193.127.219',
-                port : 3306,
-                user: 'root',
-                password: 'Jjang$194324',
-                database: 'users',
-                connectionLimit:220,
-                waitForConnections: true,
-                timezone: 'utc'
-            });
-        }
+        console.log('runing my sql prod mode');
+
+        this.sessionDBOptions = {
+            host: 'localhost',
+            user: 'qesg',
+            password: 'Jjang07',
+            database: 'sessions',
+        };
+
+        this.connection = mysql.createPool({
+            host: 'localhost',
+            port: 3306,
+            user: 'qesg',
+            password: 'Jjang07',
+            database: 'qesgs',
+            connectionLimit: 220,
+            waitForConnections: true,
+            timezone: 'utc'
+        });
 
         this.connection.on('error', (err) => {
             console.log('connection pool error');
         });
 
-        this.connection.on('connection',  (connection) => {
+        this.connection.on('connection', (connection) => {
             console.log('connection create');
         });
 
         this.connection.on('enqueue', () => {
             console.log('connection enqueue');
         });
-        
+
         this.initialize();
     }
 
@@ -65,17 +60,11 @@ export class MySqlDB extends DB {
         return MySqlDB.instance;
     }
 
+    public getSessionDBOptions(): any {
+        return this.sessionDBOptions;
+    }
     public initialize(): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
-         /*   this.connection.connect(error => {
-                if (error) {
-                    console.log(`my sql database initialize fail: ${error}`);
-                    resolve(false);
-                } else {
-                    console.log(`my sql database initialize success`);
-                    resolve(true);
-                }
-            });*/
             resolve(true);
         });
     }
@@ -105,42 +94,42 @@ export class MySqlDB extends DB {
     }
     public writeAnswersConfirm(userid: string, categorid: number, jsonData: any): Promise<boolean> {
         console.log(`writeAnswers ${userid} -- ${categorid} -- ${jsonData}`)
-        return new Promise<boolean>( (resolve) => {
-            let commentQuery = `INSERT INTO answers_confirm(uid, answers, user_id, category_id) `+
-            `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` + 
-            `'${userid}', '${categorid}')`;
+        return new Promise<boolean>((resolve) => {
+            let commentQuery = `INSERT INTO answers_confirm(uid, answers, user_id, category_id) ` +
+                `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
+                `'${userid}', '${categorid}')`;
             this.connection.query(commentQuery, (commenterror) => {
                 console.log(`writeAnswers query ${commenterror}`);
-                if(commenterror) {
+                if (commenterror) {
                     resolve(false);
                 } else {
                     resolve(true);
                 }
-           });
+            });
         });
     }
 
     public writeAnswers(userid: string, categorid: number, jsonData: any): Promise<boolean> {
         console.log(`writeAnswers ${userid} -- ${categorid} -- ${jsonData}`)
-        return new Promise<boolean>( (resolve) => {
-            let commentQuery = `INSERT INTO answers(uid, answers, user_id, category_id) `+
-            `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` + 
-            `'${userid}', '${categorid}')`;
+        return new Promise<boolean>((resolve) => {
+            let commentQuery = `INSERT INTO answers(uid, answers, user_id, category_id) ` +
+                `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
+                `'${userid}', '${categorid}')`;
             this.connection.query(commentQuery, (commenterror) => {
                 console.log(`writeAnswers query ${commenterror}`);
-                if(commenterror) {
+                if (commenterror) {
                     resolve(false);
                 } else {
                     resolve(true);
                 }
-           });
+            });
         });
     }
 
     public readAnswersConfirm(uid: string): Promise<IAnswers | null> {
-        return new Promise<IAnswers | null>( (resolve, reject) => {
+        return new Promise<IAnswers | null>((resolve, reject) => {
             const query = `SELECT * FROM answers_comfirm WHERE uid='${uid}' ORDER BY 'date' DESC LIMIT 1`;
-            this.connection.query(query,(error, results, fields) =>{
+            this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(null);
                 } else {
@@ -168,9 +157,9 @@ export class MySqlDB extends DB {
     }
 
     public readAnswers(uid: string): Promise<IAnswers | null> {
-        return new Promise<IAnswers | null>( (resolve, reject) => {
+        return new Promise<IAnswers | null>((resolve, reject) => {
             const query = `SELECT * FROM answers WHERE uid='${uid}' ORDER BY 'date' DESC LIMIT 1`;
-            this.connection.query(query,(error, results, fields) =>{
+            this.connection.query(query, (error, results, fields) => {
                 console.log(results);
                 if (error) {
                     resolve(null);
@@ -198,19 +187,19 @@ export class MySqlDB extends DB {
     }
 
     public updateAnswer(userid: string, categorid: number, jsonData: any): Promise<boolean> {
-        return new Promise<boolean>( resolve => resolve(true));
+        return new Promise<boolean>(resolve => resolve(true));
     }
 
     private convItToTextCode(scriptCode: string): string {
-       
+
         let code = scriptCode;
-        let fromAr = new Array(/\\/g,/'/g,/"/g,/\r\n/g,/[\r\n]/g,/\t/g,new RegExp('--'+'>','g'),new RegExp('<!'+'--','g'),/\//g), toAr = new Array('\\\\','\\\'','\\\"','\\n','\\n','\\t','--\'+\'>','<!\'+\'--','\\\/');
-        for( let x = 0; x < fromAr.length; x++ ) {
-            code = code.replace(fromAr[x],toAr[x]);
+        let fromAr = new Array(/\\/g, /'/g, /"/g, /\r\n/g, /[\r\n]/g, /\t/g, new RegExp('--' + '>', 'g'), new RegExp('<!' + '--', 'g'), /\//g), toAr = new Array('\\\\', '\\\'', '\\\"', '\\n', '\\n', '\\t', '--\'+\'>', '<!\'+\'--', '\\\/');
+        for (let x = 0; x < fromAr.length; x++) {
+            code = code.replace(fromAr[x], toAr[x]);
         }
         return code;
     }
-    public readCompanys(): Promise< ICompany[] | null > {
+    public readCompanys(): Promise<ICompany[] | null> {
         return new Promise<Array<ICompany> | null>(resolve => {
             const query = `SELECT * FROM company_info`;
             this.connection.query(query,
@@ -221,8 +210,10 @@ export class MySqlDB extends DB {
                         if (results && results.length > 0) {
                             let questions = new Array<ICompany>();
                             results.forEach((item: any) => {
-                                questions.push({ id: item.id,
-                                     code: item.code, name: item.name, desc: item.desc });
+                                questions.push({
+                                    id: item.id,
+                                    code: item.code, name: item.name, desc: item.desc
+                                });
                             });
                             if (questions.length > 0) {
                                 resolve(questions);
@@ -256,7 +247,7 @@ export class MySqlDB extends DB {
                                 resolve(null);
                             }
                         } else {
-                            console.log('not exist user profile');
+                            console.log('not exist questions');
                             resolve(null);
                         }
                     }
@@ -264,9 +255,9 @@ export class MySqlDB extends DB {
         });
     }
 
-    public readCQuestion(categoriId: number): Promise< ICQuestions | null> {
-        return new Promise< ICQuestions | null>(resolve => {
-            const query = `SELECT * FROM cquestions WHERE category_id='${categoriId}' ORDER BY 'revision' ASC`;
+    public readCQuestion(categoriId: number): Promise<ICQuestions | null> {
+        return new Promise<ICQuestions | null>(resolve => {
+            const query = `SELECT * FROM cquestions WHERE category_id='${categoriId}' ORDER BY id DESC LIMIT 1`;
             this.connection.query(query,
                 (error, results) => {
                     if (error) {
@@ -274,12 +265,14 @@ export class MySqlDB extends DB {
                     } else {
                         if (results && results.length > 0) {
                             let cquestion: ICQuestions;
-                            cquestion = { 
+                            cquestion = {
                                 data: results[0].data,
                                 id: results[0].id,
-                                revision: results[0].revision}                       
+                                revision: results[0].revision
+                            }
+                            resolve(cquestion);
                         } else {
-                            console.log('not exist user profile');
+                            console.log('not exist cquestion profile');
                             resolve(null);
                         }
                     }
@@ -287,8 +280,8 @@ export class MySqlDB extends DB {
         });
     }
 
-    public readCQuestionRevision(categoriId: number, revison: number): Promise< ICQuestions | null >{
-        return new Promise< ICQuestions | null>(resolve => {
+    public readCQuestionRevision(categoriId: number, revison: number): Promise<ICQuestions | null> {
+        return new Promise<ICQuestions | null>(resolve => {
             const query = `SELECT * FROM cquestions WHERE category_id='${categoriId} AND revision=${revison}' ORDER BY 'revision' ASC`;
             this.connection.query(query,
                 (error, results) => {
@@ -297,10 +290,11 @@ export class MySqlDB extends DB {
                     } else {
                         if (results && results.length > 0) {
                             let cquestion: ICQuestions;
-                            cquestion = { 
+                            cquestion = {
                                 data: results[0].data,
                                 id: results[0].id,
-                                revision: results[0].revision}                       
+                                revision: results[0].revision
+                            }
                         } else {
                             console.log('not exist user profile');
                             resolve(null);
@@ -310,28 +304,25 @@ export class MySqlDB extends DB {
         });
     }
 
-    public writetCQuestion(categoriId: number, companyid: number, jsonData: number): Promise< boolean >{
-        console.log(`CQuestions ${categoriId}-${companyid}`);
-        return new Promise<boolean>( (resolve) => {
-            
-            let cQuestionsQuery = `INSERT INTO cquestion(category_id, company_id, data) `+
-            `VALUES('${categoriId}', '${companyid}', '${this.convItToTextCode(JSON.stringify(jsonData))}'`
+    public writetCQuestion(categoriId: number, jsonData: any): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
 
+            let cQuestionsQuery = `INSERT INTO cquestions(category_id, data) ` +
+                `VALUES('${categoriId}', '${this.convItToTextCode(JSON.stringify(jsonData))}')`
             this.connection.query(cQuestionsQuery, (error) => {
-                console.log(`writeAnswers query ${error}`);
-                if(error) {
+                if (error) {
                     resolve(false);
                 } else {
                     resolve(true);
                 }
-           });
+            });
         });
     }
-    
+
     public readValidAdminUser(email: string, password: string | undefined, code: number): Promise<IUserInfo | null> {
         console.log('admin user query start');
         return new Promise<IUserInfo | null>(resolve => {
-            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.company_code, ui.agreement, ci.name as cname `;
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.company_code=ci.code AND ui.code='${code}' LIMIT 1`;
             console.log(`readValidAdminUser: ${query}`);
@@ -351,7 +342,8 @@ export class MySqlDB extends DB {
                                 user_name: results[0].user_name,
                                 level: results[0].level,
                                 company_name: results[0].cname,
-                                agreement: results[0].agreement
+                                agreement: results[0].agreement,
+                                company_code: results[0].company_code
                             };
                             console.log(`admin login success ${results[0].photo}`);
                             resolve(userInDB);
@@ -369,8 +361,8 @@ export class MySqlDB extends DB {
     public readCategoriesChild(parentID: number): Promise<Array<ICategory> | null> {
 
         const query = `SELECT * FROM categories WHERE child=1 AND parent_id=${parentID}`;
-           
-        return new Promise( resolve => {
+
+        return new Promise(resolve => {
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     return null;
@@ -392,9 +384,9 @@ export class MySqlDB extends DB {
             });
         });
     }
-    public readCategories(): Promise<Array<ICategory> | null> {
+    public readCategories(companyCode: string): Promise<Array<ICategory> | null> {
         return new Promise<Array<ICategory> | null>(resolve => {
-            const query = `SELECT * FROM categories WHERE child=0`;
+            const query = `SELECT * FROM categories WHERE child=0 && company_code = '${companyCode}' ORDER BY 'order' ASC`;
             this.connection.query(query,
                 async (error, results) => {
                     if (error) {
@@ -402,7 +394,7 @@ export class MySqlDB extends DB {
                     } else {
                         if (results && results.length > 0) {
                             let categories = new Array<ICategory>();
-                            for( let item of results) {
+                            for (let item of results) {
                                 let children = await this.readCategoriesChild(item.id);
                                 categories.push({ id: item.id, name: item.name, desc: item.desc, children: children });
                             }
@@ -481,7 +473,7 @@ export class MySqlDB extends DB {
 
     public readValidUser(email: string, password: string): Promise<IUserInfo | null> {
         return new Promise<IUserInfo | null>(resolve => {
-            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.company_code, ui.agreement, ci.name as cname `;
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.company_code=ci.code LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
@@ -499,7 +491,8 @@ export class MySqlDB extends DB {
                                 user_name: results[0].user_name,
                                 level: results[0].level,
                                 company_name: results[0].cname,
-                                agreement: results[0].agreement
+                                agreement: results[0].agreement,
+                                company_code: results[0].company_code
                             };
                             resolve(userInDB);
                         } else {

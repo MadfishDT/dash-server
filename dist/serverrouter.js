@@ -83,7 +83,7 @@ class ServerRouter {
     }
     addSessionRouter() {
         const sqlStore = new MySQLStore({
-            host: '125.177.65.248',
+            host: 'localhost',
             user: 'root',
             password: 'Jjang07',
             database: 'sessions',
@@ -196,7 +196,6 @@ class ServerRouter {
     }
     addGetCQuestionsRouter() {
         this.app.get('/cquestions', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log('readcQuestions');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {

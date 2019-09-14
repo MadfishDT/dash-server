@@ -6,6 +6,7 @@ export interface IUserInfo {
     password? : string;
     level?: number;
     company_name?: string;
+    company_code?: string;
     agreement?: boolean;
 };
 
