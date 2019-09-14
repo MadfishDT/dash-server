@@ -20,7 +20,7 @@ const login_service_1 = require("./login.service");
 const cors_1 = __importDefault(require("cors"));
 const v4_1 = __importDefault(require("uuid/v4"));
 const content_service_1 = require("./content.service");
-const MySQLStore = require('express-mysql-session')(express_session_1.default);
+const sqlSessionStore = require('express-mysql-session')(express_session_1.default);
 const responseResultCode = {
     NOTEXISTUSER: 1,
     INVALIDACCESS: 2,
@@ -75,6 +75,7 @@ class ServerRouter {
             this.addAgreementRouter();
             this.addGetCompanysRouter();
             this.addGetCQuestionsRouter();
+            this.addCQuestionsCreateRouter();
             return true;
         }
         catch (e) {
@@ -82,12 +83,7 @@ class ServerRouter {
         }
     }
     addSessionRouter() {
-        const sqlStore = new MySQLStore({
-            host: 'localhost',
-            user: 'root',
-            password: 'Jjang07',
-            database: 'sessions',
-        });
+        const sqlStore = new sqlSessionStore(this.loginService.sessionDBOptions);
         this.app.use(express_session_1.default({
             genid: (req) => {
                 return v4_1.default(); // use UUIDs for session IDs
@@ -149,7 +145,7 @@ class ServerRouter {
             console.log('catagories');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
-                    let result = yield this.contentService.getCategories();
+                    let result = yield this.contentService.getCategories(req.user.company_code);
                     if (result && result.length > 0) {
                         res.json(result);
                     }
@@ -192,16 +188,31 @@ class ServerRouter {
             }
         }));
     }
-    addInsertCQuestionsRouter() {
+    addCQuestionsCreateRouter() {
+        this.app.post('/wcqustions', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = yield this.contentService.pushCQuestions(req.body.cid, req.body.data);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
     }
     addGetCQuestionsRouter() {
         this.app.get('/cquestions', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            console.log('readcQuestions');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {
                         let id = parseInt(req.query.id, 10);
-                        let result = yield this.contentService.getQuestions(id);
-                        if (result && result.length > 0) {
+                        let result = yield this.contentService.getCQuestion(id);
+                        if (result) {
                             res.json(result);
                         }
                         else {

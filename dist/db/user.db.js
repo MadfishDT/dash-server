@@ -24,5 +24,8 @@ class UserDB {
     updateAgreement(userid) {
         return this.db.updateUserAgreement(userid);
     }
+    sessionDBOptions() {
+        return this.db.getSessionDBOptions();
+    }
 }
 exports.UserDB = UserDB;

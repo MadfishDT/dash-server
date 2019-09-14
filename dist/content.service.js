@@ -27,9 +27,9 @@ class ContentsService {
         this.categoriesSubject = new rx.Subject();
         this.contentsDB = contents_db_1.ContentsDB.getInstance();
     }
-    getCategories() {
+    getCategories(companyCode) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = yield this.contentsDB.getCategories();
+            let result = yield this.contentsDB.getCategories(companyCode);
             return result;
         });
     }
@@ -61,6 +61,21 @@ class ContentsService {
         return __awaiter(this, void 0, void 0, function* () {
             let result = yield this.contentsDB.getCompanys();
             return result;
+        });
+    }
+    getCQuestion(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.contentsDB.getCQuestion(id);
+        });
+    }
+    getCQuestionRevision(id, revision) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.contentsDB.getCQuestionRevision(id, revision);
+        });
+    }
+    pushCQuestions(categorid, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.contentsDB.pushCQuestions(categorid, data);
         });
     }
 }

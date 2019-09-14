@@ -27,31 +27,23 @@ class MySqlDB extends db_1.DB {
         }
         //console.log();
         const runningMode = process.argv[2];
-        if (runningMode === 'dev') {
-            this.connection = mysql.createPool({
-                host: '35.193.127.219',
-                port: 3306,
-                user: 'root',
-                password: 'Jjang$194324',
-                database: 'users',
-                connectionLimit: 220,
-                waitForConnections: true,
-                timezone: 'utc'
-            });
-        }
-        else {
-            console.log('runing my sql 2 prod mode');
-            this.connection = mysql.createPool({
-                host: 'localhost',
-                port: 3306,
-                user: 'root',
-                password: 'Jjang07',
-                database: 'users',
-                connectionLimit: 220,
-                waitForConnections: true,
-                timezone: 'utc'
-            });
-        }
+        console.log('runing my sql prod mode');
+        this.sessionDBOptions = {
+            host: 'localhost',
+            user: 'qesg',
+            password: 'Jjang07',
+            database: 'sessions',
+        };
+        this.connection = mysql.createPool({
+            host: 'localhost',
+            port: 3306,
+            user: 'qesg',
+            password: 'Jjang07',
+            database: 'qesgs',
+            connectionLimit: 220,
+            waitForConnections: true,
+            timezone: 'utc'
+        });
         this.connection.on('error', (err) => {
             console.log('connection pool error');
         });
@@ -67,17 +59,11 @@ class MySqlDB extends db_1.DB {
         MySqlDB.instance = MySqlDB.instance || new MySqlDB();
         return MySqlDB.instance;
     }
+    getSessionDBOptions() {
+        return this.sessionDBOptions;
+    }
     initialize() {
         return new Promise((resolve, reject) => {
-            /*   this.connection.connect(error => {
-                   if (error) {
-                       console.log(`my sql database initialize fail: ${error}`);
-                       resolve(false);
-                   } else {
-                       console.log(`my sql database initialize success`);
-                       resolve(true);
-                   }
-               });*/
             resolve(true);
         });
     }
@@ -222,8 +208,10 @@ class MySqlDB extends db_1.DB {
                     if (results && results.length > 0) {
                         let questions = new Array();
                         results.forEach((item) => {
-                            questions.push({ id: item.id,
-                                code: item.code, name: item.name, desc: item.desc });
+                            questions.push({
+                                id: item.id,
+                                code: item.code, name: item.name, desc: item.desc
+                            });
                         });
                         if (questions.length > 0) {
                             resolve(questions);
@@ -261,7 +249,7 @@ class MySqlDB extends db_1.DB {
                         }
                     }
                     else {
-                        console.log('not exist user profile');
+                        console.log('not exist questions');
                         resolve(null);
                     }
                 }
@@ -270,7 +258,7 @@ class MySqlDB extends db_1.DB {
     }
     readCQuestion(categoriId) {
         return new Promise(resolve => {
-            const query = `SELECT * FROM cquestions WHERE category_id='${categoriId}' ORDER BY 'revision' ASC`;
+            const query = `SELECT * FROM cquestions WHERE category_id='${categoriId}' ORDER BY id DESC LIMIT 1`;
             this.connection.query(query, (error, results) => {
                 if (error) {
                     resolve(null);
@@ -283,9 +271,10 @@ class MySqlDB extends db_1.DB {
                             id: results[0].id,
                             revision: results[0].revision
                         };
+                        resolve(cquestion);
                     }
                     else {
-                        console.log('not exist user profile');
+                        console.log('not exist cquestion profile');
                         resolve(null);
                     }
                 }
@@ -316,13 +305,11 @@ class MySqlDB extends db_1.DB {
             });
         });
     }
-    writetCQuestion(categoriId, companyid, jsonData) {
-        console.log(`CQuestions ${categoriId}-${companyid}`);
+    writetCQuestion(categoriId, jsonData) {
         return new Promise((resolve) => {
-            let cQuestionsQuery = `INSERT INTO cquestion(category_id, company_id, data) ` +
-                `VALUES('${categoriId}', '${companyid}', '${this.convItToTextCode(JSON.stringify(jsonData))}'`;
+            let cQuestionsQuery = `INSERT INTO cquestions(category_id, data) ` +
+                `VALUES('${categoriId}', '${this.convItToTextCode(JSON.stringify(jsonData))}')`;
             this.connection.query(cQuestionsQuery, (error) => {
-                console.log(`writeAnswers query ${error}`);
                 if (error) {
                     resolve(false);
                 }
@@ -335,7 +322,7 @@ class MySqlDB extends db_1.DB {
     readValidAdminUser(email, password, code) {
         console.log('admin user query start');
         return new Promise(resolve => {
-            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.company_code, ui.agreement, ci.name as cname `;
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.company_code=ci.code AND ui.code='${code}' LIMIT 1`;
             console.log(`readValidAdminUser: ${query}`);
@@ -356,7 +343,8 @@ class MySqlDB extends db_1.DB {
                                 user_name: results[0].user_name,
                                 level: results[0].level,
                                 company_name: results[0].cname,
-                                agreement: results[0].agreement
+                                agreement: results[0].agreement,
+                                company_code: results[0].company_code
                             };
                             console.log(`admin login success ${results[0].photo}`);
                             resolve(userInDB);
@@ -400,9 +388,9 @@ class MySqlDB extends db_1.DB {
             });
         });
     }
-    readCategories() {
+    readCategories(companyCode) {
         return new Promise(resolve => {
-            const query = `SELECT * FROM categories WHERE child=0`;
+            const query = `SELECT * FROM categories WHERE child=0 && company_code = '${companyCode}' ORDER BY 'order' ASC`;
             this.connection.query(query, (error, results) => __awaiter(this, void 0, void 0, function* () {
                 if (error) {
                     resolve(null);
@@ -491,7 +479,7 @@ class MySqlDB extends db_1.DB {
     }
     readValidUser(email, password) {
         return new Promise(resolve => {
-            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.agreement, ci.name as cname `;
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.company_code, ui.agreement, ci.name as cname `;
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.company_code=ci.code LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
@@ -510,7 +498,8 @@ class MySqlDB extends db_1.DB {
                                 user_name: results[0].user_name,
                                 level: results[0].level,
                                 company_name: results[0].cname,
-                                agreement: results[0].agreement
+                                agreement: results[0].agreement,
+                                company_code: results[0].company_code
                             };
                             resolve(userInDB);
                         }

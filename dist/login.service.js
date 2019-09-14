@@ -31,6 +31,9 @@ class LoginSerivce {
             yield this.tryLogin(info);
         }));
     }
+    get sessionDBOptions() {
+        return this.userDB.sessionDBOptions();
+    }
     extentdToken(token) {
         let findToken = this.validTokens.get(token);
         if (findToken) {
