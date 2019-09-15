@@ -118,7 +118,7 @@ export class MySqlDB extends DB {
         console.log('readAnswers');
         return new Promise<IAnswers | null>((resolve, reject) => {
             const query = `SELECT ass.*, cq.data as questions FROM answers AS ass JOIN cquestions AS cq WHERE ass.category_id='${categoryid}' `
-            +`AND ass.user_id='${userid}' AND ass.question_id=cq.id ORDER BY 'date' DESC LIMIT 1`;
+            +`AND ass.user_id='${userid}' AND ass.question_id=cq.id ORDER BY ass.date DESC LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(null);

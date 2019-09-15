@@ -359,8 +359,6 @@ export class ServerRouter {
         this.app.post('/answers', async (req, res, next) => {
             if (req.isAuthenticated()) {
                 const data = req.body.answers;
-                console.log(`addAnswerRouter ${req.user.id}, ${req.body.cid}, ${req.body.qid}`);
-
                 const result = await this.contentService.pushAnswers(req.user.id, req.body.cid, req.body.qid, data);
                 if (result) {
                     res.sendStatus(200);
