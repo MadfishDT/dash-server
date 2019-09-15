@@ -18,14 +18,11 @@ class ContentsDB {
     getQuestions(id) {
         return this.db.readQuestions(id);
     }
-    getAnswers(uid) {
-        return this.db.readAnswers(uid);
+    getAnswers(categoryid, userid) {
+        return this.db.readAnswers(categoryid, userid);
     }
-    pushAnswers(userid, categorid, jsonData) {
-        return this.db.writeAnswers(userid, categorid, jsonData);
-    }
-    pushAnswersConfirm(userid, categorid, jsonData) {
-        return this.db.writeAnswersConfirm(userid, categorid, jsonData);
+    pushAnswers(userid, categorid, questionsid, jsonData) {
+        return this.db.writeAnswers(userid, categorid, questionsid, jsonData);
     }
     getCompanys() {
         return this.db.readCompanys();

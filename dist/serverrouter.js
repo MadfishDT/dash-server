@@ -55,8 +55,8 @@ class ServerRouter {
         this.app.use(passport_1.default.initialize());
         this.app.use(passport_1.default.session());
         this.app.use(cors_1.default(option));
-        this.app.use(body_parser_1.default.json());
-        this.app.use(body_parser_1.default.urlencoded({ extended: true }));
+        this.app.use(body_parser_1.default.json({ limit: '10mb' }));
+        this.app.use(body_parser_1.default.urlencoded({ limit: '10mb', extended: true }));
         this.app.use('/photo', express_1.default.static(__dirname + '/../assets'));
         try {
             this.app.get('/', (req, res, next) => {
@@ -166,11 +166,10 @@ class ServerRouter {
     }
     addGetAnswersRouter() {
         this.app.get('/answers', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log('get answers');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
-                    if (req.query.id) {
-                        let result = yield this.contentService.getAnswers(req.query.id);
+                    if (req.query.cid) {
+                        let result = yield this.contentService.getAnswers(req.query.cid, req.user.id);
                         if (result) {
                             res.json(result);
                         }
@@ -315,7 +314,6 @@ class ServerRouter {
         this.app.get('/profile', (req, res) => __awaiter(this, void 0, void 0, function* () {
             console.log(`User profile? ${req.isAuthenticated()}`);
             if (req.isAuthenticated()) {
-                console.log(req.user.id);
                 let userProfile = yield this.loginService.getUser(req.user.id);
                 res.status(200).json(userProfile);
             }
@@ -347,24 +345,8 @@ class ServerRouter {
         this.app.post('/answers', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             if (req.isAuthenticated()) {
                 const data = req.body.answers;
-                const result = yield this.contentService.pushAnswers(req.user.id, req.body.cid, req.body.answers);
-                if (result) {
-                    res.sendStatus(200);
-                }
-                else {
-                    res.sendStatus(400);
-                }
-            }
-            else {
-                res.sendStatus(401);
-            }
-        }));
-    }
-    addAnswerConfirmRouter() {
-        this.app.post('/canswers', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            if (req.isAuthenticated()) {
-                const data = req.body.answers;
-                const result = yield this.contentService.pushAnswers(req.user.id, req.body.cid, req.body.answers);
+                console.log(`addAnswerRouter ${req.user.id}, ${req.body.cid}, ${req.body.qid}`);
+                const result = yield this.contentService.pushAnswers(req.user.id, req.body.cid, req.body.qid, data);
                 if (result) {
                     res.sendStatus(200);
                 }

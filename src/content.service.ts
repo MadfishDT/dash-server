@@ -31,18 +31,16 @@ export class ContentsService {
         return result;
     }
 
-    public async getAnswers(uid: string): Promise<IAnswers | null>  {
-        let result = await this.contentsDB.getAnswers(uid);
+    public async getAnswers(cid: number, userID: string): Promise<IAnswers | null>  {
+        let result = await this.contentsDB.getAnswers(cid, userID);
         return result;
     }
-    public async pushAnswersConfirm(userid: string, categoryid: number, answers: any[]): Promise<boolean>  {
-        let result = await this.contentsDB.pushAnswersConfirm(userid, categoryid, answers);
+
+    public async pushAnswers(userid: string, categoryid: number, questionid: number, answers: any): Promise<boolean>  {
+        let result = await this.contentsDB.pushAnswers(userid, categoryid, questionid, answers);
         return result;
     }
-    public async pushAnswers(userid: string, categoryid: number, answers: any[]): Promise<boolean>  {
-        let result = await this.contentsDB.pushAnswers(userid, categoryid, answers);
-        return result;
-    }
+
     public async getCompanys(): Promise<ICompany[] | null> {
         let result  = await this.contentsDB.getCompanys();
         return result;

@@ -26,16 +26,12 @@ export class ContentsDB {
         return this.db.readQuestions(id);
     }
 
-    public getAnswers(uid: string): Promise< IAnswers | null > {
-        return this.db.readAnswers(uid);
+    public getAnswers(categoryid: number, userid: string): Promise< IAnswers | null > {
+        return this.db.readAnswers(categoryid, userid);
     }
 
-    public pushAnswers(userid: string, categorid: number, jsonData: any): Promise<boolean> {
-        return this.db.writeAnswers(userid, categorid, jsonData);
-    }
-
-    public pushAnswersConfirm(userid: string, categorid: number, jsonData: any): Promise<boolean> {
-        return this.db.writeAnswersConfirm(userid, categorid, jsonData);
+    public pushAnswers(userid: string, categorid: number, questionsid: number, jsonData: any): Promise<boolean> {
+        return this.db.writeAnswers(userid, categorid, questionsid, jsonData);
     }
 
     public getCompanys(): Promise<ICompany[] | null> {

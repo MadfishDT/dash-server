@@ -54,7 +54,9 @@ export interface IAnswers {
     uid: number;
     user_id: string;
     category_id: number;
-    answers: any
+    answers: any;
+    question_id: number;
+    questions: any;
 }
 
 export interface ICompany {

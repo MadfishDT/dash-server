@@ -39,21 +39,15 @@ class ContentsService {
             return result;
         });
     }
-    getAnswers(uid) {
+    getAnswers(cid, userID) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = yield this.contentsDB.getAnswers(uid);
+            let result = yield this.contentsDB.getAnswers(cid, userID);
             return result;
         });
     }
-    pushAnswersConfirm(userid, categoryid, answers) {
+    pushAnswers(userid, categoryid, questionid, answers) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = yield this.contentsDB.pushAnswersConfirm(userid, categoryid, answers);
-            return result;
-        });
-    }
-    pushAnswers(userid, categoryid, answers) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let result = yield this.contentsDB.pushAnswers(userid, categoryid, answers);
+            let result = yield this.contentsDB.pushAnswers(userid, categoryid, questionid, answers);
             return result;
         });
     }
