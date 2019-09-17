@@ -83,6 +83,7 @@ export class ServerRouter {
             this.addGetCompanysRouter();
             this.addGetCQuestionsRouter();
             this.addCQuestionsCreateRouter();
+            this.addGetUserAnswersRouter();
             return true;
         } catch (e) {
             return false;
@@ -201,9 +202,29 @@ export class ServerRouter {
             }
         });
     }
-
+    public addGetUserAnswersRouter(): void {
+        console.log('fff');
+        this.app.get('/uanswers', async (req, res) => {
+            console.log('fff2');
+            if (req.isAuthenticated()  && req.user.level >= 1) {
+                if (req.session && req.user) {
+                    if (req.query.cid) {
+                        let result = await this.contentService.getUserAnswers(req.query.cid);
+                        if (result) {
+                            res.json(result);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    } else {
+                        res.sendStatus(400);
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        });
+    }
     public addCQuestionsCreateRouter(): void {
-        
         this.app.post('/wcqustions', async (req, res, next) => {
             if (req.isAuthenticated() && req.user.level >= 1) {
                 const result = await this.contentService.pushCQuestions(req.body.cid, req.body.data);

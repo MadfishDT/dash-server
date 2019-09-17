@@ -49,14 +49,28 @@ export interface ICQuestions {
     data: any;
     revision: number
 }
-
-export interface IAnswers {
+export interface IUserAnswers {
+    id?: number;
+    date: Date;
     uid: number;
     user_id: string;
     category_id: number;
     answers: any;
+    answers_id?: number;
     question_id: number;
-    questions: any;
+    questions?: any;
+    email: string;
+    user_name: string;
+}
+export interface IAnswers {
+    id?: number;
+    uid: number;
+    user_id: string;
+    category_id: number;
+    answers: any;
+    answers_id?: number;
+    question_id: number;
+    questions?: any;
 }
 
 export interface ICompany {

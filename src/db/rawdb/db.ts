@@ -1,4 +1,4 @@
-import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers, ICompany, ICQuestions } from '../dto/datadef';
+import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from '../dto/datadef';
 
 export abstract class DB {
     
@@ -19,6 +19,8 @@ export abstract class DB {
 
     //read write ansers sections
     public abstract readAnswers(categoryid: number, userid: string): Promise<IAnswers | null>;
+    public abstract readUserAnswers(categoryid: number): Promise<IUserAnswers[] | null>;
+    
     public abstract writeAnswers(userid: string, categorid: number, questionid: number, jsonData: any): Promise<boolean>;
 
     public abstract updateAnswer(userid: string, categorid: number, jsonData: any): Promise<boolean>;

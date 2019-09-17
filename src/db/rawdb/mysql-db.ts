@@ -1,4 +1,4 @@
-import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers, ICompany, ICQuestions } from '../dto/datadef'
+import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from '../dto/datadef'
 import { DB } from './db';
 import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
@@ -95,7 +95,7 @@ export class MySqlDB extends DB {
    
 
     public writeAnswers(userid: string, categorid: number, questionid: number, jsonData: any): Promise<boolean> {
-        console.log(`writeAnswers ${userid} -- ${categorid} -- ${jsonData}`)
+   
         return new Promise<boolean>((resolve) => {
             let commentQuery = `INSERT INTO answers(uid, answers, user_id, category_id, question_id) ` +
                 `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
@@ -113,7 +113,50 @@ export class MySqlDB extends DB {
 
     //let query = `SELECT ui.*, ci.name as cname FROM user_info AS ui JOIN company_info AS ci WHERE ui.id='${id}' `
     //query += `AND ui.company_code=ci.code LIMIT 1`;
+    public readUserAnswers(categoryid: number): Promise<IUserAnswers[] | null> {
+        console.log('readAnswers');
+        return new Promise<IUserAnswers[] | null>((resolve, reject) => {
+            //const query = `SELECT * FROM answers WHERE category_id='${categoryid}'`;
 
+            //const query = `SELECT * FROM (SELECT * FROM answers ORDER BY date DESC) AS sf `+
+            //`WHERE sf.category_id='${categoryid}' GROUP BY sf.category_id`;
+            console.log('readAnswers2');
+            const query = `SELECT a1.*, ua.email as email, ua.user_name as user_name FROM answers AS a1, `
+            +`(SELECT MAX(date) AS dd FROM answers GROUP BY user_id) `
+            +`AS a2 JOIN user_info AS ua WHERE a1.date=a2.dd AND a1.category_id='${categoryid}' AND ua.id=a1.user_id`;
+
+            console.log(`user answers ${query}`);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        let resutsItems = new Array<IUserAnswers>();
+                        results.forEach( (resultItem: any) => {
+                            let answersDB: IUserAnswers | null = null;
+                            answersDB = {
+                                id: resultItem.id,
+                                date: resultItem.date,
+                                uid: resultItem.uid,
+                                user_id: resultItem.user_id,
+                                category_id: resultItem.category_id,
+                                answers: resultItem.answers,
+                                answers_id: resultItem.answers_id,
+                                question_id: resultItem.question_id,
+                                email: resultItem.email,
+                                user_name: resultItem.user_name
+                            };
+                            resutsItems.push(answersDB);
+                        });
+                        resolve(resutsItems);
+                    } else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
     public readAnswers(categoryid: number, userid: string): Promise<IAnswers | null> {
         console.log('readAnswers');
         return new Promise<IAnswers | null>((resolve, reject) => {

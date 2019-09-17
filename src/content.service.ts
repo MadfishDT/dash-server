@@ -36,6 +36,10 @@ export class ContentsService {
         return result;
     }
 
+    public async getUserAnswers(cid: number): Promise<IAnswers[] | null>  {
+        let result = await this.contentsDB.getUserAnswers(cid);
+        return result;
+    }
     public async pushAnswers(userid: string, categoryid: number, questionid: number, answers: any): Promise<boolean>  {
         let result = await this.contentsDB.pushAnswers(userid, categoryid, questionid, answers);
         return result;
