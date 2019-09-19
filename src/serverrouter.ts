@@ -84,6 +84,8 @@ export class ServerRouter {
             this.addGetCQuestionsRouter();
             this.addCQuestionsCreateRouter();
             this.addGetUserAnswersRouter();
+            this.addGetUserAnswersByIdRouter();
+            this.addGetUserByIDRouter();
             return true;
         } catch (e) {
             return false;
@@ -181,6 +183,27 @@ export class ServerRouter {
             }
         })
     }
+    public addGetUserAnswersByIdRouter(): void {
+        this.app.get('/ucanswers', async (req, res) => {
+            console.log('fffww');
+            if (req.isAuthenticated()  && req.user.level >= 1) {
+                if (req.session && req.user) {
+                    if (req.query.aid) {
+                        let result = await this.contentService.getAnswersById(req.query.aid);
+                        if (result) {
+                            res.json(result);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    } else {
+                        res.sendStatus(400);
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        });
+    }
 
     public addGetAnswersRouter(): void {
         this.app.get('/answers', async (req, res) => {
@@ -205,7 +228,6 @@ export class ServerRouter {
     public addGetUserAnswersRouter(): void {
         console.log('fff');
         this.app.get('/uanswers', async (req, res) => {
-            console.log('fff2');
             if (req.isAuthenticated()  && req.user.level >= 1) {
                 if (req.session && req.user) {
                     if (req.query.cid) {
@@ -298,6 +320,22 @@ export class ServerRouter {
                     res.sendStatus(204); // not found user reponse
                 }
         });
+    }
+    public addGetUserByIDRouter(): void {
+        this.app.get('/profilebyid', async (req, res) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                if (req.session && req.user) {
+                    let userProfile = await this.loginService.getUser(req.query.uid);
+                    if (userProfile) {
+                        res.json(userProfile);
+                    } else {
+                        res.sendStatus(204); // not found user reponse
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        })
     }
 
     public addGetUserRouter(): void {

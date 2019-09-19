@@ -25,7 +25,9 @@ export class ContentsDB {
     public getQuestions(id: number): Promise< Array<IQuestions> | null > {
         return this.db.readQuestions(id);
     }
-
+    public getAnswersById(answerId: number): Promise< IAnswers | null > {
+        return this.db.readAnswersById(answerId);
+    }
     public getAnswers(categoryid: number, userid: string): Promise< IAnswers | null > {
         return this.db.readAnswers(categoryid, userid);
     }

@@ -55,7 +55,7 @@ export interface IUserAnswers {
     uid: number;
     user_id: string;
     category_id: number;
-    answers: any;
+    answers?: any;
     answers_id?: number;
     question_id: number;
     questions?: any;

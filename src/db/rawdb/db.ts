@@ -19,6 +19,8 @@ export abstract class DB {
 
     //read write ansers sections
     public abstract readAnswers(categoryid: number, userid: string): Promise<IAnswers | null>;
+    public abstract readAnswersById(answersById: number): Promise<IAnswers | null>;
+
     public abstract readUserAnswers(categoryid: number): Promise<IUserAnswers[] | null>;
     
     public abstract writeAnswers(userid: string, categorid: number, questionid: number, jsonData: any): Promise<boolean>;

@@ -92,7 +92,6 @@ export class MySqlDB extends DB {
         let result1 = text.replace(/([\\\n\r])/g, `\\$&`);
         return result1.replace("'", "''");
     }
-   
 
     public writeAnswers(userid: string, categorid: number, questionid: number, jsonData: any): Promise<boolean> {
    
@@ -116,16 +115,10 @@ export class MySqlDB extends DB {
     public readUserAnswers(categoryid: number): Promise<IUserAnswers[] | null> {
         console.log('readAnswers');
         return new Promise<IUserAnswers[] | null>((resolve, reject) => {
-            //const query = `SELECT * FROM answers WHERE category_id='${categoryid}'`;
-
-            //const query = `SELECT * FROM (SELECT * FROM answers ORDER BY date DESC) AS sf `+
-            //`WHERE sf.category_id='${categoryid}' GROUP BY sf.category_id`;
-            console.log('readAnswers2');
-            const query = `SELECT a1.*, ua.email as email, ua.user_name as user_name FROM answers AS a1, `
-            +`(SELECT MAX(date) AS dd FROM answers GROUP BY user_id) `
-            +`AS a2 JOIN user_info AS ua WHERE a1.date=a2.dd AND a1.category_id='${categoryid}' AND ua.id=a1.user_id`;
-
-            console.log(`user answers ${query}`);
+            
+             const query = `SELECT a1.*, ua.email as email, ua.user_name as user_name FROM answers AS a1 JOIN user_info AS ua ` 
+             +`WHERE a1.id IN (SELECT max(id) as id FROM answers WHERE category_id=${categoryid} GROUP BY user_id) AND ua.id=a1.user_id`;
+    
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(null);
@@ -140,8 +133,7 @@ export class MySqlDB extends DB {
                                 uid: resultItem.uid,
                                 user_id: resultItem.user_id,
                                 category_id: resultItem.category_id,
-                                answers: resultItem.answers,
-                                answers_id: resultItem.answers_id,
+                                //answers: resultItem.answers,
                                 question_id: resultItem.question_id,
                                 email: resultItem.email,
                                 user_name: resultItem.user_name
@@ -157,6 +149,34 @@ export class MySqlDB extends DB {
             });
         });
     }
+
+    public readAnswersById(aId: number): Promise<IAnswers | null> {
+        console.log('readAnswers');
+        return new Promise<IAnswers | null>((resolve, reject) => {
+            const query = `SELECT * FROM answers WHERE id='${aId}'`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        let answersDB: IAnswers | null = null;
+                        answersDB = {
+                            uid: results[0].uid,
+                            user_id: results[0].user_id,
+                            category_id: results[0].category_id,
+                            answers: results[0].answers,
+                            question_id: results[0].question_id,
+                        };
+                        resolve(answersDB);
+                    } else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
     public readAnswers(categoryid: number, userid: string): Promise<IAnswers | null> {
         console.log('readAnswers');
         return new Promise<IAnswers | null>((resolve, reject) => {
