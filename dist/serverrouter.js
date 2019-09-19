@@ -76,6 +76,9 @@ class ServerRouter {
             this.addGetCompanysRouter();
             this.addGetCQuestionsRouter();
             this.addCQuestionsCreateRouter();
+            this.addGetUserAnswersRouter();
+            this.addGetUserAnswersByIdRouter();
+            this.addGetUserByIDRouter();
             return true;
         }
         catch (e) {
@@ -89,7 +92,7 @@ class ServerRouter {
                 return v4_1.default(); // use UUIDs for session IDs
             },
             cookie: {
-                maxAge: 1000 * 60 * 30 // 10 min expire time
+                maxAge: 1000 * 60 * 50 // 10 min expire time
             },
             store: sqlStore,
             secret: '1fe1cf8077ee4cceb346081743c3edad',
@@ -164,12 +167,60 @@ class ServerRouter {
             }
         }));
     }
+    addGetUserAnswersByIdRouter() {
+        this.app.get('/ucanswers', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            console.log('fffww');
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                if (req.session && req.user) {
+                    if (req.query.aid) {
+                        let result = yield this.contentService.getAnswersById(req.query.aid);
+                        if (result) {
+                            res.json(result);
+                        }
+                        else {
+                            res.sendStatus(404);
+                        }
+                    }
+                    else {
+                        res.sendStatus(400);
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        }));
+    }
     addGetAnswersRouter() {
         this.app.get('/answers', (req, res) => __awaiter(this, void 0, void 0, function* () {
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.cid) {
                         let result = yield this.contentService.getAnswers(req.query.cid, req.user.id);
+                        if (result) {
+                            res.json(result);
+                        }
+                        else {
+                            res.sendStatus(404);
+                        }
+                    }
+                    else {
+                        res.sendStatus(400);
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        }));
+    }
+    addGetUserAnswersRouter() {
+        console.log('fff');
+        this.app.get('/uanswers', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                if (req.session && req.user) {
+                    if (req.query.cid) {
+                        let result = yield this.contentService.getUserAnswers(req.query.cid);
                         if (result) {
                             res.json(result);
                         }
@@ -261,6 +312,24 @@ class ServerRouter {
             }
             else {
                 res.sendStatus(204); // not found user reponse
+            }
+        }));
+    }
+    addGetUserByIDRouter() {
+        this.app.get('/profilebyid', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                if (req.session && req.user) {
+                    let userProfile = yield this.loginService.getUser(req.query.uid);
+                    if (userProfile) {
+                        res.json(userProfile);
+                    }
+                    else {
+                        res.sendStatus(204); // not found user reponse
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
             }
         }));
     }

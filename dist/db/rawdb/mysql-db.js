@@ -89,7 +89,6 @@ class MySqlDB extends db_1.DB {
         return result1.replace("'", "''");
     }
     writeAnswers(userid, categorid, questionid, jsonData) {
-        console.log(`writeAnswers ${userid} -- ${categorid} -- ${jsonData}`);
         return new Promise((resolve) => {
             let commentQuery = `INSERT INTO answers(uid, answers, user_id, category_id, question_id) ` +
                 `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
@@ -107,6 +106,71 @@ class MySqlDB extends db_1.DB {
     }
     //let query = `SELECT ui.*, ci.name as cname FROM user_info AS ui JOIN company_info AS ci WHERE ui.id='${id}' `
     //query += `AND ui.company_code=ci.code LIMIT 1`;
+    readUserAnswers(categoryid) {
+        console.log('readAnswers');
+        return new Promise((resolve, reject) => {
+            const query = `SELECT a1.*, ua.email as email, ua.user_name as user_name FROM answers AS a1 JOIN user_info AS ua `
+                + `WHERE a1.id IN (SELECT max(id) as id FROM answers WHERE category_id=${categoryid} GROUP BY user_id) AND ua.id=a1.user_id`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let resutsItems = new Array();
+                        results.forEach((resultItem) => {
+                            let answersDB = null;
+                            answersDB = {
+                                id: resultItem.id,
+                                date: resultItem.date,
+                                uid: resultItem.uid,
+                                user_id: resultItem.user_id,
+                                category_id: resultItem.category_id,
+                                //answers: resultItem.answers,
+                                question_id: resultItem.question_id,
+                                email: resultItem.email,
+                                user_name: resultItem.user_name
+                            };
+                            resutsItems.push(answersDB);
+                        });
+                        resolve(resutsItems);
+                    }
+                    else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+    readAnswersById(aId) {
+        console.log('readAnswers');
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM answers WHERE id='${aId}'`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let answersDB = null;
+                        answersDB = {
+                            uid: results[0].uid,
+                            user_id: results[0].user_id,
+                            category_id: results[0].category_id,
+                            answers: results[0].answers,
+                            question_id: results[0].question_id,
+                        };
+                        resolve(answersDB);
+                    }
+                    else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
     readAnswers(categoryid, userid) {
         console.log('readAnswers');
         return new Promise((resolve, reject) => {

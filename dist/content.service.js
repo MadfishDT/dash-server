@@ -45,6 +45,18 @@ class ContentsService {
             return result;
         });
     }
+    getAnswersById(answerId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = yield this.contentsDB.getAnswersById(answerId);
+            return result;
+        });
+    }
+    getUserAnswers(cid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = yield this.contentsDB.getUserAnswers(cid);
+            return result;
+        });
+    }
     pushAnswers(userid, categoryid, questionid, answers) {
         return __awaiter(this, void 0, void 0, function* () {
             let result = yield this.contentsDB.pushAnswers(userid, categoryid, questionid, answers);
