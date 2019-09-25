@@ -63,12 +63,20 @@ export class LoginSerivce {
         }
         });
     }
+    public async pushNewUser(user: any): Promise<boolean> {
+        const result = await this.userDB.pushNewUser(user);
+        return result;
+    }
     public async updateAgreement(userid: string) : Promise<boolean> {
         const result = await this.userDB.updateAgreement(userid);
         return result;
     }
     public async getUser(id: string) : Promise<IUserProfile | null> {
         let result = await this.userDB.getUser(id);
+        return result;
+    }
+    public async getUserByEmail(email: string): Promise<IUserInfo | null> {
+        let result = await this.userDB.getValidUserByEmail(email);
         return result;
     }
 
@@ -109,4 +117,5 @@ export class LoginSerivce {
             }    
         });
     }
+
 }

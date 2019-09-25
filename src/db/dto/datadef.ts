@@ -37,6 +37,14 @@ export interface ICategory {
     children?: Array<ICategory> | null
 }
 
+export interface ICCategory {
+    id: number;
+    desc: string;
+    data: any
+    date: Date
+}
+
+
 export interface IQuestions {
     id: number;
     type: string;

@@ -11,12 +11,10 @@ export class UserDB {
         }
         this.db = MySqlDB.getInstance();
     }
-
     public static getInstance(): UserDB {
         UserDB.instance = UserDB.instance || new UserDB();
         return UserDB.instance;
     }
-
     public getUser(id: string): Promise<IUserProfile | null> {
         return this.db.readUser(id);
     }
@@ -31,5 +29,11 @@ export class UserDB {
     }
     public sessionDBOptions(): any {
         return this.db.getSessionDBOptions();
+    }
+    public pushNewUser(user: any): Promise<boolean> {
+        return this.db.writeUser(user);
+    }
+    public getValidUserByEmail(email: string): Promise<IUserInfo| null> {
+        return this.db.readValidUserByEmail(email);
     }
 }

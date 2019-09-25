@@ -1,7 +1,8 @@
-import { IUserInfo, IUserProfile, ICategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from '../dto/datadef'
+import { IUserInfo, IUserProfile, ICategory, ICCategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from '../dto/datadef'
 import { DB } from './db';
 import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
+import * as uuidv1 from 'uuid/v1';
 import { createConnection } from 'net';
 
 export class MySqlDB extends DB {
@@ -91,6 +92,46 @@ export class MySqlDB extends DB {
     private db_escape_string(text: string): string {
         let result1 = text.replace(/([\\\n\r])/g, `\\$&`);
         return result1.replace("'", "''");
+    }
+
+    public readCCategories(companyCode: string): Promise<ICCategory | null> {
+        return new Promise<ICCategory | null>(resolve => {
+            const query = `SELECT * FROM ccategories WHERE company_code='${companyCode}' ORDER BY date DESC LIMITE 1`;
+            this.connection.query(query, async (error, results) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                            const cdatas = {
+                                id: results[0].id,
+                                desc: results[0].desc,
+                                data: results[0].data,
+                                date: results[0].date,
+                            }
+                            resolve(cdatas);
+                        } else {
+                            resolve(null);
+                        }
+                    }
+                });
+        });
+    }
+
+    public writeCCategories(ccode: string, jsonData: any, desc: number): Promise<boolean> {
+   
+        return new Promise<boolean>((resolve) => {
+            let commentQuery = `INSERT INTO ccategories (company_code, data, desc) ` +
+                `VALUES('${ccode}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
+                `'${desc}')`;
+            this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
     }
 
     public writeAnswers(userid: string, categorid: number, questionid: number, jsonData: any): Promise<boolean> {
@@ -219,6 +260,24 @@ export class MySqlDB extends DB {
         }
         return code;
     }
+    public existCompanyCode(code: string): Promise<boolean> {
+        return new Promise<boolean>(resolve => {
+            const query = `SELECT * FROM company_info WHERE code='${code}'`;
+            this.connection.query(query,
+                (error, results, fields) => {
+                    if (error) {
+                        if(results.length >= 1) {
+                            resolve(true);
+                        }
+                        else {
+                            resolve(false);
+                        }
+                    } else {
+                        resolve(false);
+                    }
+                });
+        });
+    }
     public readCompanys(): Promise<ICompany[] | null> {
         return new Promise<Array<ICompany> | null>(resolve => {
             const query = `SELECT * FROM company_info`;
@@ -248,6 +307,7 @@ export class MySqlDB extends DB {
                 });
         });
     }
+
     public readQuestions(categoryid: number): Promise<Array<IQuestions> | null> {
         return new Promise<Array<IQuestions> | null>(resolve => {
             const query = `SELECT * FROM questions WHERE category_id='${categoryid}' ORDER BY 'order' DESC`;
@@ -323,8 +383,22 @@ export class MySqlDB extends DB {
                 });
         });
     }
-
-    public writetCQuestion(categoriId: number, jsonData: any): Promise<boolean> {
+    public writeUser(userinfo: any): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            //IUserInfo
+            let guid = uuidv1.default();
+            let cQuestionsQuery = `INSERT INTO user_info(id, email, password, user_name, company_name, company_code, part) ` +
+                `VALUES('${guid}', '${userinfo.email}', '${userinfo.password}', '${userinfo.name}', '${userinfo.cname}', '${userinfo.ccode}', '${userinfo.part}'`
+            this.connection.query(cQuestionsQuery, (error) => {
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    public writeCQuestion(categoriId: number, jsonData: any): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
 
             let cQuestionsQuery = `INSERT INTO cquestions(category_id, data) ` +
@@ -486,6 +560,41 @@ export class MySqlDB extends DB {
         })
     }
 
+    public readValidUserByEmail(email: string): Promise<IUserInfo | null> {
+        return new Promise<IUserInfo | null>(resolve => {
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.company_code, ui.agreement, ci.name as cname `;
+            query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
+            query += `AND ui.company_code=ci.code LIMIT 1`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        if (results[0].level <= 0) {
+                            let userInDB: IUserInfo | null = null;
+                            userInDB = {
+                                email: results[0].email,
+                                id: results[0].id,
+                                password: '',
+                                photo: results[0].photo,
+                                user_name: results[0].user_name,
+                                level: results[0].level,
+                                company_name: results[0].cname,
+                                agreement: results[0].agreement,
+                                company_code: results[0].company_code
+                            };
+                            resolve(userInDB);
+                        } else {
+                            resolve(null);
+                        }
+                    } else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
     public readValidUser(email: string, password: string): Promise<IUserInfo | null> {
         return new Promise<IUserInfo | null>(resolve => {
             let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.company_code, ui.agreement, ci.name as cname `;

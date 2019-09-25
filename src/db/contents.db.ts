@@ -1,4 +1,4 @@
-import { DB, MySqlDB, ICategory, IQuestions, ICompany, ICQuestions, IUserAnswers } from './rawdb/dbs';
+import { DB, MySqlDB, ICategory, IQuestions, ICompany, ICQuestions, IUserAnswers, ICCategory } from './rawdb/dbs';
 import { IAnswers } from './dto/datadef';
 
 export class ContentsDB {
@@ -25,9 +25,11 @@ export class ContentsDB {
     public getQuestions(id: number): Promise< Array<IQuestions> | null > {
         return this.db.readQuestions(id);
     }
+
     public getAnswersById(answerId: number): Promise< IAnswers | null > {
         return this.db.readAnswersById(answerId);
     }
+
     public getAnswers(categoryid: number, userid: string): Promise< IAnswers | null > {
         return this.db.readAnswers(categoryid, userid);
     }
@@ -53,6 +55,18 @@ export class ContentsDB {
     }
 
     public pushCQuestions(categorid: number, data: any): Promise<boolean> {
-        return this.db.writetCQuestion(categorid, data);
+        return this.db.writeCQuestion(categorid, data);
+    }
+
+    public pushCCategories(ccode: string, data: any, desc: number): Promise<boolean> {
+        return this.db.writeCCategories(ccode, data, desc);
+    }
+
+    public getCCategories(companyCode: string): Promise<ICCategory | null>  {
+        return this.db.readCCategories(companyCode);
+    }
+
+    public existCompanyCode(code: string): Promise<boolean> {
+        return this.db.existCompanyCode(code);
     }
 }

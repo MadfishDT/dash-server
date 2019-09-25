@@ -1,6 +1,6 @@
 import { Gernerators } from './generators'
 import { ContentsDB} from './db/contents.db';
-import { ICategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from './db/dto/datadef';
+import { ICategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers, ICCategory } from './db/dto/datadef';
 import * as fs from 'fs';
 import * as rx from 'rx';
 import { stringify } from 'querystring';
@@ -65,4 +65,15 @@ export class ContentsService {
         return this.contentsDB.pushCQuestions(categorid, data);
     }
 
+    public async pushCCategories(ccode: string, data: any, desc: number): Promise<boolean> {
+        return this.contentsDB.pushCCategories(ccode, data, desc);
+    }
+
+    public getCCategories(companyCode: string): Promise<ICCategory | null>  {
+        return this.contentsDB.getCCategories(companyCode);
+    }
+
+    public existCompany(code: string): Promise<boolean> {
+        return this.contentsDB.existCompanyCode(code);
+    }
 }

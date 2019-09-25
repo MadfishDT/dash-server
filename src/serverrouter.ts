@@ -183,9 +183,31 @@ export class ServerRouter {
             }
         })
     }
+
+    public addGetCCategoriesRouter(): void {
+        this.app.get('/ccategories', async (req, res) => {
+            console.log('ccategories');
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = await this.contentService.getCCategories(req.user.company_code);
+                    if (result) {
+                        res.json(result);
+                    } else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        })
+    }
+
     public addGetUserAnswersByIdRouter(): void {
         this.app.get('/ucanswers', async (req, res) => {
-            console.log('fffww');
             if (req.isAuthenticated()  && req.user.level >= 1) {
                 if (req.session && req.user) {
                     if (req.query.aid) {
@@ -225,8 +247,8 @@ export class ServerRouter {
             }
         });
     }
+
     public addGetUserAnswersRouter(): void {
-        console.log('fff');
         this.app.get('/uanswers', async (req, res) => {
             if (req.isAuthenticated()  && req.user.level >= 1) {
                 if (req.session && req.user) {
@@ -246,10 +268,51 @@ export class ServerRouter {
             }
         });
     }
+
     public addCQuestionsCreateRouter(): void {
         this.app.post('/wcqustions', async (req, res, next) => {
             if (req.isAuthenticated() && req.user.level >= 1) {
                 const result = await this.contentService.pushCQuestions(req.body.cid, req.body.data);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+
+    public addUserCreateRouter(): void {
+        this.app.post('/nuser', async (req, res, next) => {
+            if (!req.isAuthenticated()) {
+                const exitUser = await this.loginService.getUserByEmail(req.body.email);
+                const cInfo = await this.contentService.existCompany(req.body.company_code);
+                if(!exitUser) {
+                    if(!cInfo) {
+                        res.sendStatus(406);
+                    }
+                    const result = await this.loginService.pushNewUser(req.body);
+                    if (result) {
+                        res.sendStatus(200);
+                    } else {
+                        res.sendStatus(400);
+                    }
+                } else {
+                    res.sendStatus(409);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+
+
+    public addCCategoriesCreateRouter(): void {
+        this.app.post('/wccategories', async (req, res, next) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = await this.contentService.pushCCategories(req.user.company_code, req.body.data, req.body.desc);
                 if (result) {
                     res.sendStatus(200);
                 } else {
