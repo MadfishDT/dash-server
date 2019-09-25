@@ -86,6 +86,7 @@ export class ServerRouter {
             this.addGetUserAnswersRouter();
             this.addGetUserAnswersByIdRouter();
             this.addGetUserByIDRouter();
+            this.addUserCreateRouter();
             return true;
         } catch (e) {
             return false;
@@ -286,9 +287,12 @@ export class ServerRouter {
 
     public addUserCreateRouter(): void {
         this.app.post('/nuser', async (req, res, next) => {
+            console.log('fwefwefwef');
             if (!req.isAuthenticated()) {
                 const exitUser = await this.loginService.getUserByEmail(req.body.email);
-                const cInfo = await this.contentService.existCompany(req.body.company_code);
+                console.log(`exist ${exitUser}`);
+                const cInfo = await this.contentService.existCompany(req.body.ccode);
+                console.log(`exist ${cInfo}`);
                 if(!exitUser) {
                     if(!cInfo) {
                         res.sendStatus(406);

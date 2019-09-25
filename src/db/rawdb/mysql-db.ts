@@ -263,9 +263,10 @@ export class MySqlDB extends DB {
     public existCompanyCode(code: string): Promise<boolean> {
         return new Promise<boolean>(resolve => {
             const query = `SELECT * FROM company_info WHERE code='${code}'`;
+            console.log(query);
             this.connection.query(query,
                 (error, results, fields) => {
-                    if (error) {
+                    if (!error) {
                         if(results.length >= 1) {
                             resolve(true);
                         }
@@ -388,7 +389,8 @@ export class MySqlDB extends DB {
             //IUserInfo
             let guid = uuidv1.default();
             let cQuestionsQuery = `INSERT INTO user_info(id, email, password, user_name, company_name, company_code, part) ` +
-                `VALUES('${guid}', '${userinfo.email}', '${userinfo.password}', '${userinfo.name}', '${userinfo.cname}', '${userinfo.ccode}', '${userinfo.part}'`
+                `VALUES('${guid}', '${userinfo.email}', '${userinfo.password}', '${userinfo.name}', '${userinfo.cname}', '${userinfo.ccode}', '${userinfo.part}')`;
+            console.log(`${cQuestionsQuery}`);
             this.connection.query(cQuestionsQuery, (error) => {
                 if (error) {
                     resolve(false);
