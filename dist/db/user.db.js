@@ -27,5 +27,11 @@ class UserDB {
     sessionDBOptions() {
         return this.db.getSessionDBOptions();
     }
+    pushNewUser(user) {
+        return this.db.writeUser(user);
+    }
+    getValidUserByEmail(email) {
+        return this.db.readValidUserByEmail(email);
+    }
 }
 exports.UserDB = UserDB;

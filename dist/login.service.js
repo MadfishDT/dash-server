@@ -68,6 +68,12 @@ class LoginSerivce {
             }
         });
     }
+    pushNewUser(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.userDB.pushNewUser(user);
+            return result;
+        });
+    }
     updateAgreement(userid) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield this.userDB.updateAgreement(userid);
@@ -77,6 +83,12 @@ class LoginSerivce {
     getUser(id) {
         return __awaiter(this, void 0, void 0, function* () {
             let result = yield this.userDB.getUser(id);
+            return result;
+        });
+    }
+    getUserByEmail(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = yield this.userDB.getValidUserByEmail(email);
             return result;
         });
     }

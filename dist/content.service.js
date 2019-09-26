@@ -84,5 +84,16 @@ class ContentsService {
             return this.contentsDB.pushCQuestions(categorid, data);
         });
     }
+    pushCCategories(ccode, data, desc) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.contentsDB.pushCCategories(ccode, data, desc);
+        });
+    }
+    getCCategories(companyCode) {
+        return this.contentsDB.getCCategories(companyCode);
+    }
+    existCompany(code) {
+        return this.contentsDB.existCompanyCode(code);
+    }
 }
 exports.ContentsService = ContentsService;

@@ -40,7 +40,16 @@ class ContentsDB {
         return this.db.readCQuestionRevision(id, revision);
     }
     pushCQuestions(categorid, data) {
-        return this.db.writetCQuestion(categorid, data);
+        return this.db.writeCQuestion(categorid, data);
+    }
+    pushCCategories(ccode, data, desc) {
+        return this.db.writeCCategories(ccode, data, desc);
+    }
+    getCCategories(companyCode) {
+        return this.db.readCCategories(companyCode);
+    }
+    existCompanyCode(code) {
+        return this.db.existCompanyCode(code);
     }
 }
 exports.ContentsDB = ContentsDB;

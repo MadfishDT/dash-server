@@ -79,6 +79,7 @@ class ServerRouter {
             this.addGetUserAnswersRouter();
             this.addGetUserAnswersByIdRouter();
             this.addGetUserByIDRouter();
+            this.addUserCreateRouter();
             return true;
         }
         catch (e) {
@@ -167,9 +168,32 @@ class ServerRouter {
             }
         }));
     }
+    addGetCCategoriesRouter() {
+        this.app.get('/ccategories', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            console.log('ccategories');
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = yield this.contentService.getCCategories(req.user.company_code);
+                    if (result) {
+                        res.json(result);
+                    }
+                    else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        }
+                        else {
+                            res.sendStatus(404);
+                        }
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        }));
+    }
     addGetUserAnswersByIdRouter() {
         this.app.get('/ucanswers', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log('fffww');
             if (req.isAuthenticated() && req.user.level >= 1) {
                 if (req.session && req.user) {
                     if (req.query.aid) {
@@ -215,7 +239,6 @@ class ServerRouter {
         }));
     }
     addGetUserAnswersRouter() {
-        console.log('fff');
         this.app.get('/uanswers', (req, res) => __awaiter(this, void 0, void 0, function* () {
             if (req.isAuthenticated() && req.user.level >= 1) {
                 if (req.session && req.user) {
@@ -242,6 +265,51 @@ class ServerRouter {
         this.app.post('/wcqustions', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             if (req.isAuthenticated() && req.user.level >= 1) {
                 const result = yield this.contentService.pushCQuestions(req.body.cid, req.body.data);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addUserCreateRouter() {
+        this.app.post('/nuser', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            console.log('fwefwefwef');
+            if (!req.isAuthenticated()) {
+                const exitUser = yield this.loginService.getUserByEmail(req.body.email);
+                console.log(`exist ${exitUser}`);
+                const cInfo = yield this.contentService.existCompany(req.body.ccode);
+                console.log(`exist ${cInfo}`);
+                if (!exitUser) {
+                    if (!cInfo) {
+                        res.sendStatus(406);
+                    }
+                    const result = yield this.loginService.pushNewUser(req.body);
+                    if (result) {
+                        res.sendStatus(200);
+                    }
+                    else {
+                        res.sendStatus(400);
+                    }
+                }
+                else {
+                    res.sendStatus(409);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addCCategoriesCreateRouter() {
+        this.app.post('/wccategories', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = yield this.contentService.pushCCategories(req.user.company_code, req.body.data, req.body.desc);
                 if (result) {
                     res.sendStatus(200);
                 }

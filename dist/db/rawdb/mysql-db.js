@@ -18,6 +18,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const db_1 = require("./db");
 const mysql = __importStar(require("mysql"));
 const generators_1 = require("../../generators");
+const uuidv1 = __importStar(require("uuid/v1"));
 class MySqlDB extends db_1.DB {
     constructor() {
         super();
@@ -87,6 +88,46 @@ class MySqlDB extends db_1.DB {
     db_escape_string(text) {
         let result1 = text.replace(/([\\\n\r])/g, `\\$&`);
         return result1.replace("'", "''");
+    }
+    readCCategories(companyCode) {
+        return new Promise(resolve => {
+            const query = `SELECT * FROM ccategories WHERE company_code='${companyCode}' ORDER BY date DESC LIMITE 1`;
+            this.connection.query(query, (error, results) => __awaiter(this, void 0, void 0, function* () {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        const cdatas = {
+                            id: results[0].id,
+                            desc: results[0].desc,
+                            data: results[0].data,
+                            date: results[0].date,
+                        };
+                        resolve(cdatas);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            }));
+        });
+    }
+    writeCCategories(ccode, jsonData, desc) {
+        return new Promise((resolve) => {
+            let commentQuery = `INSERT INTO ccategories (company_code, data, desc) ` +
+                `VALUES('${ccode}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
+                `'${desc}')`;
+            this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
     }
     writeAnswers(userid, categorid, questionid, jsonData) {
         return new Promise((resolve) => {
@@ -212,6 +253,25 @@ class MySqlDB extends db_1.DB {
         }
         return code;
     }
+    existCompanyCode(code) {
+        return new Promise(resolve => {
+            const query = `SELECT * FROM company_info WHERE code='${code}'`;
+            console.log(query);
+            this.connection.query(query, (error, results, fields) => {
+                if (!error) {
+                    if (results.length >= 1) {
+                        resolve(true);
+                    }
+                    else {
+                        resolve(false);
+                    }
+                }
+                else {
+                    resolve(false);
+                }
+            });
+        });
+    }
     readCompanys() {
         return new Promise(resolve => {
             const query = `SELECT * FROM company_info`;
@@ -320,7 +380,24 @@ class MySqlDB extends db_1.DB {
             });
         });
     }
-    writetCQuestion(categoriId, jsonData) {
+    writeUser(userinfo) {
+        return new Promise((resolve) => {
+            //IUserInfo
+            let guid = uuidv1.default();
+            let cQuestionsQuery = `INSERT INTO user_info(id, email, password, user_name, company_name, company_code, part) ` +
+                `VALUES('${guid}', '${userinfo.email}', '${userinfo.password}', '${userinfo.name}', '${userinfo.cname}', '${userinfo.ccode}', '${userinfo.part}')`;
+            console.log(`${cQuestionsQuery}`);
+            this.connection.query(cQuestionsQuery, (error) => {
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    writeCQuestion(categoriId, jsonData) {
         return new Promise((resolve) => {
             let cQuestionsQuery = `INSERT INTO cquestions(category_id, data) ` +
                 `VALUES('${categoriId}', '${this.convItToTextCode(JSON.stringify(jsonData))}')`;
@@ -483,6 +560,44 @@ class MySqlDB extends db_1.DB {
                 }
                 else {
                     resolve(true);
+                }
+            });
+        });
+    }
+    readValidUserByEmail(email) {
+        return new Promise(resolve => {
+            let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.company_code, ui.agreement, ci.name as cname `;
+            query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
+            query += `AND ui.company_code=ci.code LIMIT 1`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        if (results[0].level <= 0) {
+                            let userInDB = null;
+                            userInDB = {
+                                email: results[0].email,
+                                id: results[0].id,
+                                password: '',
+                                photo: results[0].photo,
+                                user_name: results[0].user_name,
+                                level: results[0].level,
+                                company_name: results[0].cname,
+                                agreement: results[0].agreement,
+                                company_code: results[0].company_code
+                            };
+                            resolve(userInDB);
+                        }
+                        else {
+                            resolve(null);
+                        }
+                    }
+                    else {
+                        console.log('not exist user');
+                        resolve(null);
+                    }
                 }
             });
         });
