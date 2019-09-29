@@ -32,8 +32,8 @@ export abstract class DB {
     public abstract readCompanys(): Promise<ICompany[] | null>;
     public abstract getSessionDBOptions(): any;
 
-    public abstract writeCCategories(ccode: string, jsonData: any, desc: number): Promise<boolean>;
-    public abstract readCCategories(companyCode: string): Promise<ICCategory | null>;
+    public abstract writeCCategories(ccode: string, code: string, jsonData: any, desc: number): Promise<boolean>;
+    public abstract readCCategories(companyCode: string, code: string): Promise<ICCategory | null>;
     public abstract writeUser(user: any): Promise<boolean>;
 
     public abstract existCompanyCode(code: string): Promise<boolean>;

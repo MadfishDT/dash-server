@@ -87,6 +87,7 @@ export class ServerRouter {
             this.addGetUserAnswersByIdRouter();
             this.addGetUserByIDRouter();
             this.addUserCreateRouter();
+            this.addGetNewCGuid();
             return true;
         } catch (e) {
             return false;
@@ -185,12 +186,35 @@ export class ServerRouter {
         })
     }
 
+    public addGetNewCGuid(): void {
+        this.app.get('/nguid', (req, res) => {
+            console.log('nguid');
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = this.contentService.getNewUID();
+                    if (result) {
+                        res.set('Content-Type', 'text/plain');
+                        res.send(result);
+                    } else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        })
+    }
+
     public addGetCCategoriesRouter(): void {
         this.app.get('/ccategories', async (req, res) => {
             console.log('ccategories');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
-                    let result = await this.contentService.getCCategories(req.user.company_code);
+                    let result = await this.contentService.getCCategories(req.user.company_code,req.query.code);
                     if (result) {
                         res.json(result);
                     } else {
@@ -312,11 +336,10 @@ export class ServerRouter {
         });
     }
 
-
     public addCCategoriesCreateRouter(): void {
         this.app.post('/wccategories', async (req, res, next) => {
             if (req.isAuthenticated() && req.user.level >= 1) {
-                const result = await this.contentService.pushCCategories(req.user.company_code, req.body.data, req.body.desc);
+                const result = await this.contentService.pushCCategories(req.user.company_code, req.body.code, req.body.data, req.body.desc);
                 if (result) {
                     res.sendStatus(200);
                 } else {

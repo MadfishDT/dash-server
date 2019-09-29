@@ -4,6 +4,7 @@ import { ICategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers, I
 import * as fs from 'fs';
 import * as rx from 'rx';
 import { stringify } from 'querystring';
+import * as uuidv1 from 'uuid/v1';
 
 export class ContentsService {
   // tslint:disable-next-line:typedef-whitespace
@@ -20,7 +21,10 @@ export class ContentsService {
         this.categoriesSubject = new rx.Subject<ICategory[]>();
         this.contentsDB = ContentsDB.getInstance();
     }
-    
+    public getNewUID(): string {
+        let guid = uuidv1.default();
+        return guid;
+    }    
     public async getCategories(companyCode: string): Promise<ICategory[] | null> {
         let result = await this.contentsDB.getCategories(companyCode);
         return result;
@@ -65,12 +69,12 @@ export class ContentsService {
         return this.contentsDB.pushCQuestions(categorid, data);
     }
 
-    public async pushCCategories(ccode: string, data: any, desc: number): Promise<boolean> {
-        return this.contentsDB.pushCCategories(ccode, data, desc);
+    public async pushCCategories(ccode: string, code: string, data: any, desc: number): Promise<boolean> {
+        return this.contentsDB.pushCCategories(ccode, code, data, desc);
     }
 
-    public getCCategories(companyCode: string): Promise<ICCategory | null>  {
-        return this.contentsDB.getCCategories(companyCode);
+    public getCCategories(companyCode: string, code: string): Promise<ICCategory | null>  {
+        return this.contentsDB.getCCategories(companyCode, code);
     }
 
     public existCompany(code: string): Promise<boolean> {

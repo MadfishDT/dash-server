@@ -94,9 +94,9 @@ export class MySqlDB extends DB {
         return result1.replace("'", "''");
     }
 
-    public readCCategories(companyCode: string): Promise<ICCategory | null> {
+    public readCCategories(companyCode: string, code: string): Promise<ICCategory | null> {
         return new Promise<ICCategory | null>(resolve => {
-            const query = `SELECT * FROM ccategories WHERE company_code='${companyCode}' ORDER BY date DESC LIMITE 1`;
+            const query = `SELECT * FROM ccategories WHERE company_code='${companyCode}' AND code='${code}' ORDER BY date DESC LIMITE 1`;
             this.connection.query(query, async (error, results) => {
                 if (error) {
                     resolve(null);
@@ -107,6 +107,7 @@ export class MySqlDB extends DB {
                                 desc: results[0].desc,
                                 data: results[0].data,
                                 date: results[0].date,
+                                code: results[0].code,
                             }
                             resolve(cdatas);
                         } else {
@@ -117,11 +118,11 @@ export class MySqlDB extends DB {
         });
     }
 
-    public writeCCategories(ccode: string, jsonData: any, desc: number): Promise<boolean> {
+    public writeCCategories(ccode: string, code: string, jsonData: any, desc: number): Promise<boolean> {
    
         return new Promise<boolean>((resolve) => {
-            let commentQuery = `INSERT INTO ccategories (company_code, data, desc) ` +
-                `VALUES('${ccode}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
+            let commentQuery = `INSERT INTO ccategories (company_code, code, data, desc) ` +
+                `VALUES('${ccode}','${code}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
                 `'${desc}')`;
             this.connection.query(commentQuery, (commenterror) => {
                 console.log(`writeAnswers query ${commenterror}`);

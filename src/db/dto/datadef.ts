@@ -40,8 +40,9 @@ export interface ICategory {
 export interface ICCategory {
     id: number;
     desc: string;
-    data: any
-    date: Date
+    data: any;
+    date: Date;
+    code: string;
 }
 
 

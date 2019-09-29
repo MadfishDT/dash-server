@@ -58,12 +58,12 @@ export class ContentsDB {
         return this.db.writeCQuestion(categorid, data);
     }
 
-    public pushCCategories(ccode: string, data: any, desc: number): Promise<boolean> {
-        return this.db.writeCCategories(ccode, data, desc);
+    public pushCCategories(ccode: string, code: string, data: any, desc: number): Promise<boolean> {
+        return this.db.writeCCategories(ccode, code, data, desc);
     }
 
-    public getCCategories(companyCode: string): Promise<ICCategory | null>  {
-        return this.db.readCCategories(companyCode);
+    public getCCategories(companyCode: string, code: string): Promise<ICCategory | null>  {
+        return this.db.readCCategories(companyCode, code);
     }
 
     public existCompanyCode(code: string): Promise<boolean> {
