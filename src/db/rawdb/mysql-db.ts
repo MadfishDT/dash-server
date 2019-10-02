@@ -163,7 +163,7 @@ export class MySqlDB extends DB {
         });
     }
 
-    public writeAnswers(userid: string, categorid: number, questionid: number, jsonData: any): Promise<boolean> {
+    public writeAnswers(userid: string, categorid: string, questionid: number, jsonData: any): Promise<boolean> {
    
         return new Promise<boolean>((resolve) => {
             let commentQuery = `INSERT INTO answers(uid, answers, user_id, category_id, question_id) ` +
@@ -182,13 +182,13 @@ export class MySqlDB extends DB {
 
     //let query = `SELECT ui.*, ci.name as cname FROM user_info AS ui JOIN company_info AS ci WHERE ui.id='${id}' `
     //query += `AND ui.company_code=ci.code LIMIT 1`;
-    public readUserAnswers(categoryid: number): Promise<IUserAnswers[] | null> {
+    public readUserAnswers(categoryid: string): Promise<IUserAnswers[] | null> {
         console.log('readAnswers');
         return new Promise<IUserAnswers[] | null>((resolve, reject) => {
             
              const query = `SELECT a1.*, ua.email as email, ua.user_name as user_name FROM answers AS a1 JOIN user_info AS ua ` 
-             +`WHERE a1.id IN (SELECT max(id) as id FROM answers WHERE category_id=${categoryid} GROUP BY user_id) AND ua.id=a1.user_id`;
-    
+             +`WHERE a1.id IN (SELECT max(id) as id FROM answers WHERE category_id='${categoryid}' GROUP BY user_id) AND ua.id=a1.user_id`;
+            console.log(`${query}`);
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(null);

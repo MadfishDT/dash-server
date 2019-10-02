@@ -34,11 +34,11 @@ export class ContentsDB {
         return this.db.readAnswers(categoryid, userid);
     }
 
-    public getUserAnswers(categoryid: number): Promise< IUserAnswers[] | null > {
+    public getUserAnswers(categoryid: string): Promise< IUserAnswers[] | null > {
         return this.db.readUserAnswers(categoryid);
     }
 
-    public pushAnswers(userid: string, categorid: number, questionsid: number, jsonData: any): Promise<boolean> {
+    public pushAnswers(userid: string, categorid: string, questionsid: number, jsonData: any): Promise<boolean> {
         return this.db.writeAnswers(userid, categorid, questionsid, jsonData);
     }
 

@@ -300,6 +300,7 @@ export class ServerRouter {
 
     public addGetUserAnswersRouter(): void {
         this.app.get('/uanswers', async (req, res) => {
+            console.log("thisis");
             if (req.isAuthenticated()  && req.user.level >= 1) {
                 if (req.session && req.user) {
                     if (req.query.cid) {

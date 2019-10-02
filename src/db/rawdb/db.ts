@@ -23,9 +23,9 @@ export abstract class DB {
     public abstract readAnswers(categoryid: number, userid: string): Promise<IAnswers | null>;
     public abstract readAnswersById(answersById: number): Promise<IAnswers | null>;
 
-    public abstract readUserAnswers(categoryid: number): Promise<IUserAnswers[] | null>;
+    public abstract readUserAnswers(categoryid: string): Promise<IUserAnswers[] | null>;
     
-    public abstract writeAnswers(userid: string, categorid: number, questionid: number, jsonData: any): Promise<boolean>;
+    public abstract writeAnswers(userid: string, categorid: string, questionid: number, jsonData: any): Promise<boolean>;
 
     public abstract updateAnswer(userid: string, categorid: number, jsonData: any): Promise<boolean>;
     public abstract updateUserAgreement(userid: string): Promise<boolean>;
