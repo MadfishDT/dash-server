@@ -94,9 +94,10 @@ export class MySqlDB extends DB {
         return result1.replace("'", "''");
     }
 
-    public readCCategories(companyCode: string, code: string): Promise<ICCategory | null> {
+    public readCCategoriesByCCode(ccode: string): Promise<ICCategory | null> {
         return new Promise<ICCategory | null>(resolve => {
-            const query = `SELECT * FROM ccategories WHERE company_code='${companyCode}' AND code='${code}' ORDER BY date DESC LIMITE 1`;
+            const query = `SELECT * FROM ccategories WHERE ccode='${ccode}' ORDER BY date DESC LIMIT 1`;
+            console.log(query);
             this.connection.query(query, async (error, results) => {
                 if (error) {
                     resolve(null);
@@ -108,6 +109,7 @@ export class MySqlDB extends DB {
                                 data: results[0].data,
                                 date: results[0].date,
                                 code: results[0].code,
+                                ccode: results[0].ccode
                             }
                             resolve(cdatas);
                         } else {
@@ -118,12 +120,38 @@ export class MySqlDB extends DB {
         });
     }
 
-    public writeCCategories(ccode: string, code: string, jsonData: any, desc: number): Promise<boolean> {
-   
+    public readCCategories(companyCode: string, code: string): Promise<ICCategory | null> {
+        return new Promise<ICCategory | null>(resolve => {
+            const query = `SELECT * FROM ccategories WHERE company_code='${companyCode}' AND code='${code}' ORDER BY date DESC LIMITE 1`;
+            this.connection.query(query, async (error, results) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                            const cdatas = {
+                                id: results[0].id,
+                                desc: results[0].descs,
+                                data: results[0].data,
+                                date: results[0].date,
+                                code: results[0].code,
+                                ccode: results[0].ccode
+                            }
+                            resolve(cdatas);
+                        } else {
+                            resolve(null);
+                        }
+                    }
+                });
+        });
+    }
+
+    public writeCCategories(ccode: string, code: string, jsonData: any, descs: string): Promise<boolean> {
+        
         return new Promise<boolean>((resolve) => {
-            let commentQuery = `INSERT INTO ccategories (company_code, code, data, desc) ` +
-                `VALUES('${ccode}','${code}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
-                `'${desc}')`;
+            let commentQuery = `INSERT INTO ccategories(ccode, code, data, descs) ` +
+                `VALUES('${ccode}','${code}','${this.convItToTextCode(JSON.stringify(jsonData))}', '${descs}')`;
+
+            console.log(commentQuery);
             this.connection.query(commentQuery, (commenterror) => {
                 console.log(`writeAnswers query ${commenterror}`);
                 if (commenterror) {
@@ -310,7 +338,7 @@ export class MySqlDB extends DB {
         });
     }
 
-    public readQuestions(categoryid: number): Promise<Array<IQuestions> | null> {
+    public readQuestions(categoryid: string): Promise<Array<IQuestions> | null> {
         return new Promise<Array<IQuestions> | null>(resolve => {
             const query = `SELECT * FROM questions WHERE category_id='${categoryid}' ORDER BY 'order' DESC`;
             this.connection.query(query,
@@ -337,7 +365,7 @@ export class MySqlDB extends DB {
         });
     }
 
-    public readCQuestion(categoriId: number): Promise<ICQuestions | null> {
+    public readCQuestion(categoriId: string): Promise<ICQuestions | null> {
         return new Promise<ICQuestions | null>(resolve => {
             const query = `SELECT * FROM cquestions WHERE category_id='${categoriId}' ORDER BY id DESC LIMIT 1`;
             this.connection.query(query,
@@ -401,7 +429,7 @@ export class MySqlDB extends DB {
             });
         });
     }
-    public writeCQuestion(categoriId: number, jsonData: any): Promise<boolean> {
+    public writeCQuestion(categoriId: string, jsonData: any): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
 
             let cQuestionsQuery = `INSERT INTO cquestions(category_id, data) ` +

@@ -30,7 +30,7 @@ export class ContentsService {
         return result;
     }
 
-    public async getQuestions(id: number): Promise<IQuestions[] | null> {
+    public async getQuestions(id: string): Promise<IQuestions[] | null> {
         let result = await this.contentsDB.getQuestions(id);
         return result;
     }
@@ -57,7 +57,7 @@ export class ContentsService {
         return result;
     }
 
-    public async getCQuestion(id: number): Promise< ICQuestions | null > {
+    public async getCQuestion(id: string): Promise< ICQuestions | null > {
         return this.contentsDB.getCQuestion(id);
     }
 
@@ -65,11 +65,11 @@ export class ContentsService {
         return this.contentsDB.getCQuestionRevision(id, revision);
     }
 
-    public async  pushCQuestions(categorid: number, data: any): Promise<boolean> {
+    public async  pushCQuestions(categorid: string, data: any): Promise<boolean> {
         return this.contentsDB.pushCQuestions(categorid, data);
     }
 
-    public async pushCCategories(ccode: string, code: string, data: any, desc: number): Promise<boolean> {
+    public async pushCCategories(ccode: string, code: string, data: any, desc: string): Promise<boolean> {
         return this.contentsDB.pushCCategories(ccode, code, data, desc);
     }
 
@@ -77,6 +77,9 @@ export class ContentsService {
         return this.contentsDB.getCCategories(companyCode, code);
     }
 
+    public getCCategoriesByCCode(companyCode: string): Promise<ICCategory | null>  {
+        return this.contentsDB.getCCategoriesByCCode(companyCode);
+    }
     public existCompany(code: string): Promise<boolean> {
         return this.contentsDB.existCompanyCode(code);
     }

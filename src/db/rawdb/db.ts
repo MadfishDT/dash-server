@@ -10,12 +10,12 @@ export abstract class DB {
     public abstract readValidUserByEmail(email: string): Promise< IUserInfo | null>;
     
     public abstract readCategories(companyCode: string): Promise< Array<ICategory> | null>;
-    public abstract readQuestions(id: number): Promise< Array<IQuestions> | null>;
+    public abstract readQuestions(id: string): Promise< Array<IQuestions> | null>;
     
     //questions section
-    public abstract readCQuestion(categoriId: number): Promise< ICQuestions | null >;
+    public abstract readCQuestion(categoriId: string): Promise< ICQuestions | null >;
     public abstract readCQuestionRevision(categoriId: number, revison: number): Promise< ICQuestions | null >;
-    public abstract writeCQuestion(categoriId: number, data: any): Promise< boolean >;
+    public abstract writeCQuestion(categoriId: string, data: any): Promise< boolean >;
 
     public abstract readValidAdminUser(email: string, password: string | undefined , code: number): Promise< IUserInfo | null>;
 
@@ -32,8 +32,9 @@ export abstract class DB {
     public abstract readCompanys(): Promise<ICompany[] | null>;
     public abstract getSessionDBOptions(): any;
 
-    public abstract writeCCategories(ccode: string, code: string, jsonData: any, desc: number): Promise<boolean>;
+    public abstract writeCCategories(ccode: string, code: string, jsonData: any, desc: string): Promise<boolean>;
     public abstract readCCategories(companyCode: string, code: string): Promise<ICCategory | null>;
+    public abstract readCCategoriesByCCode(companyCode: string): Promise<ICCategory | null>;
     public abstract writeUser(user: any): Promise<boolean>;
 
     public abstract existCompanyCode(code: string): Promise<boolean>;

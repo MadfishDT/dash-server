@@ -22,7 +22,7 @@ export class ContentsDB {
         return this.db.readCategories(companyCode);
     }
 
-    public getQuestions(id: number): Promise< Array<IQuestions> | null > {
+    public getQuestions(id: string): Promise< Array<IQuestions> | null > {
         return this.db.readQuestions(id);
     }
 
@@ -46,7 +46,7 @@ export class ContentsDB {
         return this.db.readCompanys();
     }
     
-    public getCQuestion(id: number): Promise< ICQuestions | null > {
+    public getCQuestion(id: string): Promise< ICQuestions | null > {
         return this.db.readCQuestion(id);
     }
 
@@ -54,18 +54,20 @@ export class ContentsDB {
         return this.db.readCQuestionRevision(id, revision);
     }
 
-    public pushCQuestions(categorid: number, data: any): Promise<boolean> {
+    public pushCQuestions(categorid: string, data: any): Promise<boolean> {
         return this.db.writeCQuestion(categorid, data);
     }
 
-    public pushCCategories(ccode: string, code: string, data: any, desc: number): Promise<boolean> {
+    public pushCCategories(ccode: string, code: string, data: any, desc: string): Promise<boolean> {
         return this.db.writeCCategories(ccode, code, data, desc);
     }
 
     public getCCategories(companyCode: string, code: string): Promise<ICCategory | null>  {
         return this.db.readCCategories(companyCode, code);
     }
-
+    public getCCategoriesByCCode(companyCode: string): Promise<ICCategory | null>  {
+        return this.db.readCCategoriesByCCode(companyCode);
+    }
     public existCompanyCode(code: string): Promise<boolean> {
         return this.db.existCompanyCode(code);
     }

@@ -43,6 +43,7 @@ export interface ICCategory {
     data: any;
     date: Date;
     code: string;
+    ccode: string;
 }
 
 

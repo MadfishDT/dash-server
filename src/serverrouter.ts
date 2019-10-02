@@ -88,6 +88,9 @@ export class ServerRouter {
             this.addGetUserByIDRouter();
             this.addUserCreateRouter();
             this.addGetNewCGuid();
+            this.addGetCCategoriesByCompanyRouter();
+            this.addGetCCategoriesRouter();
+            this.addCCategoriesCreateRouter();
             return true;
         } catch (e) {
             return false;
@@ -209,6 +212,28 @@ export class ServerRouter {
         })
     }
 
+    public addGetCCategoriesByCompanyRouter(): void {
+        this.app.get('/ccategoriescode', async (req, res) => {
+            console.log(`ccategoriescode ${req.user.company_code}`);
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = await this.contentService.getCCategoriesByCCode(req.user.company_code);
+                    if (result) {
+                        res.json(result);
+                    } else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        })
+    }
+
     public addGetCCategoriesRouter(): void {
         this.app.get('/ccategories', async (req, res) => {
             console.log('ccategories');
@@ -311,7 +336,6 @@ export class ServerRouter {
 
     public addUserCreateRouter(): void {
         this.app.post('/nuser', async (req, res, next) => {
-            console.log('fwefwefwef');
             if (!req.isAuthenticated()) {
                 const exitUser = await this.loginService.getUserByEmail(req.body.email);
                 console.log(`exist ${exitUser}`);
@@ -338,6 +362,7 @@ export class ServerRouter {
 
     public addCCategoriesCreateRouter(): void {
         this.app.post('/wccategories', async (req, res, next) => {
+            console.log(`wccategories ${req.user.company_code} ${req.body.code} ${req.body.data}, ${req.body.desc} `);
             if (req.isAuthenticated() && req.user.level >= 1) {
                 const result = await this.contentService.pushCCategories(req.user.company_code, req.body.code, req.body.data, req.body.desc);
                 if (result) {
@@ -357,8 +382,7 @@ export class ServerRouter {
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {
-                        let id = parseInt(req.query.id, 10);
-                        let result = await this.contentService.getCQuestion(id);
+                        let result = await this.contentService.getCQuestion(req.query.id);
                         if (result) {
                             res.json(result);
                         } else {
@@ -381,8 +405,7 @@ export class ServerRouter {
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {
-                        let id = parseInt(req.query.id, 10);
-                        let result = await this.contentService.getQuestions(id);
+                        let result = await this.contentService.getQuestions(req.query.id);
                         if (result && result.length > 0) {
                             res.json(result);
                         } else {
@@ -400,7 +423,6 @@ export class ServerRouter {
     }
 
     public addGetCompanysRouter(): void {
-        
         this.app.get('/comp', async (req, res) => {
           
                 let companys = await this.contentService.getCompanys()
@@ -411,6 +433,7 @@ export class ServerRouter {
                 }
         });
     }
+
     public addGetUserByIDRouter(): void {
         this.app.get('/profilebyid', async (req, res) => {
             if (req.isAuthenticated() && req.user.level >= 1) {
