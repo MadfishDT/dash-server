@@ -18,6 +18,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const generators_1 = require("./generators");
 const contents_db_1 = require("./db/contents.db");
 const rx = __importStar(require("rx"));
+const uuidv1 = __importStar(require("uuid/v1"));
 class ContentsService {
     static bootstrap() {
         return new ContentsService();
@@ -26,6 +27,10 @@ class ContentsService {
         this.generators = generators_1.Gernerators.bootstrap();
         this.categoriesSubject = new rx.Subject();
         this.contentsDB = contents_db_1.ContentsDB.getInstance();
+    }
+    getNewUID() {
+        let guid = uuidv1.default();
+        return guid;
     }
     getCategories(companyCode) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -84,13 +89,16 @@ class ContentsService {
             return this.contentsDB.pushCQuestions(categorid, data);
         });
     }
-    pushCCategories(ccode, data, desc) {
+    pushCCategories(ccode, code, data, desc) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.contentsDB.pushCCategories(ccode, data, desc);
+            return this.contentsDB.pushCCategories(ccode, code, data, desc);
         });
     }
-    getCCategories(companyCode) {
-        return this.contentsDB.getCCategories(companyCode);
+    getCCategories(companyCode, code) {
+        return this.contentsDB.getCCategories(companyCode, code);
+    }
+    getCCategoriesByCCode(companyCode) {
+        return this.contentsDB.getCCategoriesByCCode(companyCode);
     }
     existCompany(code) {
         return this.contentsDB.existCompanyCode(code);

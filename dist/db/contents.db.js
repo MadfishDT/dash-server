@@ -42,11 +42,14 @@ class ContentsDB {
     pushCQuestions(categorid, data) {
         return this.db.writeCQuestion(categorid, data);
     }
-    pushCCategories(ccode, data, desc) {
-        return this.db.writeCCategories(ccode, data, desc);
+    pushCCategories(ccode, code, data, desc) {
+        return this.db.writeCCategories(ccode, code, data, desc);
     }
-    getCCategories(companyCode) {
-        return this.db.readCCategories(companyCode);
+    getCCategories(companyCode, code) {
+        return this.db.readCCategories(companyCode, code);
+    }
+    getCCategoriesByCCode(companyCode) {
+        return this.db.readCCategoriesByCCode(companyCode);
     }
     existCompanyCode(code) {
         return this.db.existCompanyCode(code);

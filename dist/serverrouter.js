@@ -80,6 +80,10 @@ class ServerRouter {
             this.addGetUserAnswersByIdRouter();
             this.addGetUserByIDRouter();
             this.addUserCreateRouter();
+            this.addGetNewCGuid();
+            this.addGetCCategoriesByCompanyRouter();
+            this.addGetCCategoriesRouter();
+            this.addCCategoriesCreateRouter();
             return true;
         }
         catch (e) {
@@ -168,12 +172,61 @@ class ServerRouter {
             }
         }));
     }
+    addGetNewCGuid() {
+        this.app.get('/nguid', (req, res) => {
+            console.log('nguid');
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = this.contentService.getNewUID();
+                    if (result) {
+                        res.set('Content-Type', 'text/plain');
+                        res.send(result);
+                    }
+                    else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        }
+                        else {
+                            res.sendStatus(404);
+                        }
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        });
+    }
+    addGetCCategoriesByCompanyRouter() {
+        this.app.get('/ccategoriescode', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            console.log(`ccategoriescode ${req.user.company_code}`);
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = yield this.contentService.getCCategoriesByCCode(req.user.company_code);
+                    if (result) {
+                        res.json(result);
+                    }
+                    else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        }
+                        else {
+                            res.sendStatus(404);
+                        }
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        }));
+    }
     addGetCCategoriesRouter() {
         this.app.get('/ccategories', (req, res) => __awaiter(this, void 0, void 0, function* () {
             console.log('ccategories');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
-                    let result = yield this.contentService.getCCategories(req.user.company_code);
+                    let result = yield this.contentService.getCCategories(req.user.company_code, req.query.code);
                     if (result) {
                         res.json(result);
                     }
@@ -240,6 +293,7 @@ class ServerRouter {
     }
     addGetUserAnswersRouter() {
         this.app.get('/uanswers', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            console.log("thisis");
             if (req.isAuthenticated() && req.user.level >= 1) {
                 if (req.session && req.user) {
                     if (req.query.cid) {
@@ -279,7 +333,6 @@ class ServerRouter {
     }
     addUserCreateRouter() {
         this.app.post('/nuser', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            console.log('fwefwefwef');
             if (!req.isAuthenticated()) {
                 const exitUser = yield this.loginService.getUserByEmail(req.body.email);
                 console.log(`exist ${exitUser}`);
@@ -308,8 +361,9 @@ class ServerRouter {
     }
     addCCategoriesCreateRouter() {
         this.app.post('/wccategories', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            console.log(`wccategories ${req.user.company_code} ${req.body.code} ${req.body.data}, ${req.body.desc} `);
             if (req.isAuthenticated() && req.user.level >= 1) {
-                const result = yield this.contentService.pushCCategories(req.user.company_code, req.body.data, req.body.desc);
+                const result = yield this.contentService.pushCCategories(req.user.company_code, req.body.code, req.body.data, req.body.desc);
                 if (result) {
                     res.sendStatus(200);
                 }
@@ -328,8 +382,7 @@ class ServerRouter {
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {
-                        let id = parseInt(req.query.id, 10);
-                        let result = yield this.contentService.getCQuestion(id);
+                        let result = yield this.contentService.getCQuestion(req.query.id);
                         if (result) {
                             res.json(result);
                         }
@@ -353,8 +406,7 @@ class ServerRouter {
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {
-                        let id = parseInt(req.query.id, 10);
-                        let result = yield this.contentService.getQuestions(id);
+                        let result = yield this.contentService.getQuestions(req.query.id);
                         if (result && result.length > 0) {
                             res.json(result);
                         }

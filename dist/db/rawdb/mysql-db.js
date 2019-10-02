@@ -89,9 +89,10 @@ class MySqlDB extends db_1.DB {
         let result1 = text.replace(/([\\\n\r])/g, `\\$&`);
         return result1.replace("'", "''");
     }
-    readCCategories(companyCode) {
+    readCCategoriesByCCode(ccode) {
         return new Promise(resolve => {
-            const query = `SELECT * FROM ccategories WHERE company_code='${companyCode}' ORDER BY date DESC LIMITE 1`;
+            const query = `SELECT * FROM ccategories WHERE ccode='${ccode}' ORDER BY date DESC LIMIT 1`;
+            console.log(query);
             this.connection.query(query, (error, results) => __awaiter(this, void 0, void 0, function* () {
                 if (error) {
                     resolve(null);
@@ -103,6 +104,8 @@ class MySqlDB extends db_1.DB {
                             desc: results[0].desc,
                             data: results[0].data,
                             date: results[0].date,
+                            code: results[0].code,
+                            ccode: results[0].ccode
                         };
                         resolve(cdatas);
                     }
@@ -113,11 +116,37 @@ class MySqlDB extends db_1.DB {
             }));
         });
     }
-    writeCCategories(ccode, jsonData, desc) {
+    readCCategories(companyCode, code) {
+        return new Promise(resolve => {
+            const query = `SELECT * FROM ccategories WHERE company_code='${companyCode}' AND code='${code}' ORDER BY date DESC LIMITE 1`;
+            this.connection.query(query, (error, results) => __awaiter(this, void 0, void 0, function* () {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        const cdatas = {
+                            id: results[0].id,
+                            desc: results[0].descs,
+                            data: results[0].data,
+                            date: results[0].date,
+                            code: results[0].code,
+                            ccode: results[0].ccode
+                        };
+                        resolve(cdatas);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            }));
+        });
+    }
+    writeCCategories(ccode, code, jsonData, descs) {
         return new Promise((resolve) => {
-            let commentQuery = `INSERT INTO ccategories (company_code, data, desc) ` +
-                `VALUES('${ccode}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
-                `'${desc}')`;
+            let commentQuery = `INSERT INTO ccategories(ccode, code, data, descs) ` +
+                `VALUES('${ccode}','${code}','${this.convItToTextCode(JSON.stringify(jsonData))}', '${descs}')`;
+            console.log(commentQuery);
             this.connection.query(commentQuery, (commenterror) => {
                 console.log(`writeAnswers query ${commenterror}`);
                 if (commenterror) {
@@ -151,7 +180,8 @@ class MySqlDB extends db_1.DB {
         console.log('readAnswers');
         return new Promise((resolve, reject) => {
             const query = `SELECT a1.*, ua.email as email, ua.user_name as user_name FROM answers AS a1 JOIN user_info AS ua `
-                + `WHERE a1.id IN (SELECT max(id) as id FROM answers WHERE category_id=${categoryid} GROUP BY user_id) AND ua.id=a1.user_id`;
+                + `WHERE a1.id IN (SELECT max(id) as id FROM answers WHERE category_id='${categoryid}' GROUP BY user_id) AND ua.id=a1.user_id`;
+            console.log(`${query}`);
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(null);
