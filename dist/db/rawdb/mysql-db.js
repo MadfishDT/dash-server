@@ -145,7 +145,6 @@ class MySqlDB extends db_1.DB {
         return new Promise((resolve) => {
             let commentQuery = `INSERT INTO ccategories(ccode, code, data, descs) ` +
                 `VALUES('${ccode}','${code}','${this.convItToTextCode(JSON.stringify(jsonData))}', '${descs}')`;
-            console.log(commentQuery);
             this.connection.query(commentQuery, (commenterror) => {
                 console.log(`writeAnswers query ${commenterror}`);
                 if (commenterror) {
