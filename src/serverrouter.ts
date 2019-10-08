@@ -214,7 +214,6 @@ export class ServerRouter {
 
     public addGetCCategoriesByCompanyRouter(): void {
         this.app.get('/ccategoriescode', async (req, res) => {
-            console.log(`ccategoriescode ${req.user.company_code}`);
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     let result = await this.contentService.getCCategoriesByCCode(req.user.company_code);
@@ -236,7 +235,6 @@ export class ServerRouter {
 
     public addGetCCategoriesRouter(): void {
         this.app.get('/ccategories', async (req, res) => {
-            console.log('ccategories');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     let result = await this.contentService.getCCategories(req.user.company_code,req.query.code);
@@ -300,7 +298,6 @@ export class ServerRouter {
 
     public addGetUserAnswersRouter(): void {
         this.app.get('/uanswers', async (req, res) => {
-            console.log("thisis");
             if (req.isAuthenticated()  && req.user.level >= 1) {
                 if (req.session && req.user) {
                     if (req.query.cid) {
@@ -337,11 +334,9 @@ export class ServerRouter {
 
     public addUserCreateRouter(): void {
         this.app.post('/nuser', async (req, res, next) => {
-            if (!req.isAuthenticated()) {
+            if (req.isAuthenticated() && req.user.level >= 1) {
                 const exitUser = await this.loginService.getUserByEmail(req.body.email);
-                console.log(`exist ${exitUser}`);
                 const cInfo = await this.contentService.existCompany(req.body.ccode);
-                console.log(`exist ${cInfo}`);
                 if(!exitUser) {
                     if(!cInfo) {
                         res.sendStatus(406);
@@ -379,7 +374,6 @@ export class ServerRouter {
 
     public addGetCQuestionsRouter(): void {
         this.app.get('/cquestions', async (req, res) => {
-            console.log('readcQuestions');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {
@@ -402,7 +396,6 @@ export class ServerRouter {
 
     public addGetQuestionsRouter(): void {
         this.app.get('/questions', async (req, res) => {
-            console.log('readQuestions');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {
@@ -471,7 +464,6 @@ export class ServerRouter {
 
     public addAgreementRouter(): void {
         this.app.post('/agree', async (req, res) => {
-            console.log(`update agreement? ${req.isAuthenticated()}`);
             if (req.isAuthenticated()) {
                 let result = await this.loginService.updateAgreement(req.user.id);
                 if (result) {
@@ -488,7 +480,6 @@ export class ServerRouter {
 
     public addAuthrequiredRouter(): void {
         this.app.get('/authrequired', (req, res) => {
-            console.log(`User authenticated? ${req.isAuthenticated()}`);
             if (req.isAuthenticated()) {
                 res.status(200).json(req.user);
             } else {
@@ -499,7 +490,6 @@ export class ServerRouter {
 
     public addProfileRequestRouter(): void {
         this.app.get('/profile', async (req, res) => {
-            console.log(`User profile? ${req.isAuthenticated()}`);
             if (req.isAuthenticated()) {
                 let userProfile = await this.loginService.getUser(req.user.id);
                 res.status(200).json(userProfile);
@@ -514,7 +504,8 @@ export class ServerRouter {
             passport.authenticate('local', (err, user, info) => {
                 req.login(user, (loginError: any) => {
                     if (req.session && req.user) {
-                        console.log('success login');
+
+                        console.log(`success login: ${req.user.user_name}`);
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
                         res.type('json');
                         return res.json(req.user);
@@ -549,13 +540,13 @@ export class ServerRouter {
             passport.authenticate('local', (err, user, info) => {
                 req.login(user, (loginError: any) => {
                     if (req.session && req.user) {
-                        console.log('success login');
+                        console.log('success login admin');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
                         res.type('json');
                         return res.json(req.user);
                         //return res.send('You were authenticated & logged in!\n');
                     } else {
-                        console.log('fail login');
+                        console.log('fail login admin');
                         return res.sendStatus(401);
                     }
                 });

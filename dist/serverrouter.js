@@ -199,7 +199,6 @@ class ServerRouter {
     }
     addGetCCategoriesByCompanyRouter() {
         this.app.get('/ccategoriescode', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log(`ccategoriescode ${req.user.company_code}`);
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     let result = yield this.contentService.getCCategoriesByCCode(req.user.company_code);
@@ -223,7 +222,6 @@ class ServerRouter {
     }
     addGetCCategoriesRouter() {
         this.app.get('/ccategories', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log('ccategories');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     let result = yield this.contentService.getCCategories(req.user.company_code, req.query.code);
@@ -293,7 +291,6 @@ class ServerRouter {
     }
     addGetUserAnswersRouter() {
         this.app.get('/uanswers', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log("thisis");
             if (req.isAuthenticated() && req.user.level >= 1) {
                 if (req.session && req.user) {
                     if (req.query.cid) {
@@ -333,11 +330,9 @@ class ServerRouter {
     }
     addUserCreateRouter() {
         this.app.post('/nuser', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            if (!req.isAuthenticated()) {
+            if (req.isAuthenticated() && req.user.level >= 1) {
                 const exitUser = yield this.loginService.getUserByEmail(req.body.email);
-                console.log(`exist ${exitUser}`);
                 const cInfo = yield this.contentService.existCompany(req.body.ccode);
-                console.log(`exist ${cInfo}`);
                 if (!exitUser) {
                     if (!cInfo) {
                         res.sendStatus(406);
@@ -378,7 +373,6 @@ class ServerRouter {
     }
     addGetCQuestionsRouter() {
         this.app.get('/cquestions', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log('readcQuestions');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {
@@ -402,7 +396,6 @@ class ServerRouter {
     }
     addGetQuestionsRouter() {
         this.app.get('/questions', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log('readQuestions');
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     if (req.query.id) {
@@ -473,7 +466,6 @@ class ServerRouter {
     }
     addAgreementRouter() {
         this.app.post('/agree', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log(`update agreement? ${req.isAuthenticated()}`);
             if (req.isAuthenticated()) {
                 let result = yield this.loginService.updateAgreement(req.user.id);
                 if (result) {
@@ -490,7 +482,6 @@ class ServerRouter {
     }
     addAuthrequiredRouter() {
         this.app.get('/authrequired', (req, res) => {
-            console.log(`User authenticated? ${req.isAuthenticated()}`);
             if (req.isAuthenticated()) {
                 res.status(200).json(req.user);
             }
@@ -501,7 +492,6 @@ class ServerRouter {
     }
     addProfileRequestRouter() {
         this.app.get('/profile', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            console.log(`User profile? ${req.isAuthenticated()}`);
             if (req.isAuthenticated()) {
                 let userProfile = yield this.loginService.getUser(req.user.id);
                 res.status(200).json(userProfile);
@@ -516,7 +506,7 @@ class ServerRouter {
             passport_1.default.authenticate('local', (err, user, info) => {
                 req.login(user, (loginError) => {
                     if (req.session && req.user) {
-                        console.log('success login');
+                        console.log(`success login: ${req.user.user_name}`);
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
                         res.type('json');
                         return res.json(req.user);
@@ -552,14 +542,14 @@ class ServerRouter {
             passport_1.default.authenticate('local', (err, user, info) => {
                 req.login(user, (loginError) => {
                     if (req.session && req.user) {
-                        console.log('success login');
+                        console.log('success login admin');
                         res.setHeader('Access-Control-Allow-Credentials', 'true');
                         res.type('json');
                         return res.json(req.user);
                         //return res.send('You were authenticated & logged in!\n');
                     }
                     else {
-                        console.log('fail login');
+                        console.log('fail login admin');
                         return res.sendStatus(401);
                     }
                 });

@@ -97,7 +97,6 @@ export class MySqlDB extends DB {
     public readCCategoriesByCCode(ccode: string): Promise<ICCategory | null> {
         return new Promise<ICCategory | null>(resolve => {
             const query = `SELECT * FROM ccategories WHERE ccode='${ccode}' ORDER BY date DESC LIMIT 1`;
-            console.log(query);
             this.connection.query(query, async (error, results) => {
                 if (error) {
                     resolve(null);
@@ -170,7 +169,6 @@ export class MySqlDB extends DB {
                 `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
                 `'${userid}', '${categorid}', '${questionid}')`;
             this.connection.query(commentQuery, (commenterror) => {
-                console.log(`writeAnswers query ${commenterror}`);
                 if (commenterror) {
                     resolve(false);
                 } else {
@@ -183,12 +181,11 @@ export class MySqlDB extends DB {
     //let query = `SELECT ui.*, ci.name as cname FROM user_info AS ui JOIN company_info AS ci WHERE ui.id='${id}' `
     //query += `AND ui.company_code=ci.code LIMIT 1`;
     public readUserAnswers(categoryid: string): Promise<IUserAnswers[] | null> {
-        console.log('readAnswers');
         return new Promise<IUserAnswers[] | null>((resolve, reject) => {
             
              const query = `SELECT a1.*, ua.email as email, ua.user_name as user_name FROM answers AS a1 JOIN user_info AS ua ` 
              +`WHERE a1.id IN (SELECT max(id) as id FROM answers WHERE category_id='${categoryid}' GROUP BY user_id) AND ua.id=a1.user_id`;
-            console.log(`${query}`);
+        
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(null);
@@ -212,7 +209,6 @@ export class MySqlDB extends DB {
                         });
                         resolve(resutsItems);
                     } else {
-                        console.log('not exist user');
                         resolve(null);
                     }
                 }
@@ -221,7 +217,6 @@ export class MySqlDB extends DB {
     }
 
     public readAnswersById(aId: number): Promise<IAnswers | null> {
-        console.log('readAnswers');
         return new Promise<IAnswers | null>((resolve, reject) => {
             const query = `SELECT * FROM answers WHERE id='${aId}'`;
             this.connection.query(query, (error, results, fields) => {
@@ -239,7 +234,6 @@ export class MySqlDB extends DB {
                         };
                         resolve(answersDB);
                     } else {
-                        console.log('not exist user');
                         resolve(null);
                     }
                 }
@@ -248,7 +242,6 @@ export class MySqlDB extends DB {
     }
 
     public readAnswers(categoryid: number, userid: string): Promise<IAnswers | null> {
-        console.log('readAnswers');
         return new Promise<IAnswers | null>((resolve, reject) => {
             const query = `SELECT ass.*, cq.data as questions FROM answers AS ass JOIN cquestions AS cq WHERE ass.category_id='${categoryid}' `
             +`AND ass.user_id='${userid}' AND ass.question_id=cq.id ORDER BY ass.date DESC LIMIT 1`;
@@ -268,7 +261,6 @@ export class MySqlDB extends DB {
                         };
                         resolve(answersDB);
                     } else {
-                        console.log('not exist user');
                         resolve(null);
                     }
                 }
@@ -292,7 +284,6 @@ export class MySqlDB extends DB {
     public existCompanyCode(code: string): Promise<boolean> {
         return new Promise<boolean>(resolve => {
             const query = `SELECT * FROM company_info WHERE code='${code}'`;
-            console.log(query);
             this.connection.query(query,
                 (error, results, fields) => {
                     if (!error) {
@@ -330,7 +321,6 @@ export class MySqlDB extends DB {
                                 resolve(null);
                             }
                         } else {
-                            console.log('not exist user profile');
                             resolve(null);
                         }
                     }
@@ -357,7 +347,6 @@ export class MySqlDB extends DB {
                                 resolve(null);
                             }
                         } else {
-                            console.log('not exist questions');
                             resolve(null);
                         }
                     }
@@ -382,7 +371,6 @@ export class MySqlDB extends DB {
                             }
                             resolve(cquestion);
                         } else {
-                            console.log('not exist cquestion profile');
                             resolve(null);
                         }
                     }
@@ -406,7 +394,6 @@ export class MySqlDB extends DB {
                                 revision: results[0].revision
                             }
                         } else {
-                            console.log('not exist user profile');
                             resolve(null);
                         }
                     }
@@ -419,7 +406,6 @@ export class MySqlDB extends DB {
             let guid = uuidv1.default();
             let cQuestionsQuery = `INSERT INTO user_info(id, email, password, user_name, company_name, company_code, part) ` +
                 `VALUES('${guid}', '${userinfo.email}', '${userinfo.password}', '${userinfo.name}', '${userinfo.cname}', '${userinfo.ccode}', '${userinfo.part}')`;
-            console.log(`${cQuestionsQuery}`);
             this.connection.query(cQuestionsQuery, (error) => {
                 if (error) {
                     resolve(false);
@@ -451,7 +437,6 @@ export class MySqlDB extends DB {
             query += `AND ui.password='${password}' AND ui.company_code=ci.code AND ui.code='${code}' LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
-                    console.log(error);
                     resolve(null);
                 } else {
                     if (results && results.length > 0) {
@@ -568,7 +553,6 @@ export class MySqlDB extends DB {
                                 resolve(null);
                             }
                         } else {
-                            console.log('not exist user profile');
                             resolve(null);
                         }
                     }
@@ -577,12 +561,10 @@ export class MySqlDB extends DB {
     }
 
     public updateUserAgreement(uid: string): Promise<boolean> {
-        console.log('update agreement');
         return new Promise<boolean>((resolve) => {
             const query = `UPDATE user_info SET agreement='1' WHERE id='${uid}'`;
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
-                    console.log(error);
                     resolve(false);
                 } else {
                     resolve(true);
@@ -619,7 +601,6 @@ export class MySqlDB extends DB {
                             resolve(null);
                         }
                     } else {
-                        console.log('not exist user');
                         resolve(null);
                     }
                 }
@@ -654,7 +635,6 @@ export class MySqlDB extends DB {
                             resolve(null);
                         }
                     } else {
-                        console.log('not exist user');
                         resolve(null);
                     }
                 }
