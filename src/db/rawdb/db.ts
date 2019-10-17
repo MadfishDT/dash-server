@@ -1,4 +1,4 @@
-import { IUserInfo, IUserProfile, ICategory, ICCategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from '../dto/datadef';
+import { IUserInfo, IUserProfile, ICategory, ICCampaign, ICCategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from '../dto/datadef';
 
 export abstract class DB {
     
@@ -38,4 +38,9 @@ export abstract class DB {
     public abstract writeUser(user: any): Promise<boolean>;
 
     public abstract existCompanyCode(code: string): Promise<boolean>;
+
+    public abstract readCampaignsByUser(userId: string): Promise<ICCampaign[] | null>;
+    public abstract readCampaignById(udi: string): Promise<ICCampaign | null>;
+    public abstract writeCampaign(campignInfo: any): Promise<boolean>;
+    public abstract updateCampaign(campignInfo: any): Promise<boolean>;
 }

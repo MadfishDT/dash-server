@@ -1,4 +1,4 @@
-import { DB, MySqlDB, ICategory, IQuestions, ICompany, ICQuestions, IUserAnswers, ICCategory } from './rawdb/dbs';
+import { DB, MySqlDB, ICategory, IQuestions, ICompany, ICQuestions,ICCampaign, IUserAnswers, ICCategory } from './rawdb/dbs';
 import { IAnswers } from './dto/datadef';
 
 export class ContentsDB {
@@ -70,5 +70,17 @@ export class ContentsDB {
     }
     public existCompanyCode(code: string): Promise<boolean> {
         return this.db.existCompanyCode(code);
+    }
+    public getCampaignsByUser(userId: string): Promise<ICCampaign[] | null> {
+        return this.db.readCampaignsByUser(userId);
+    }
+    public getCampaignById(uid: string): Promise<ICCampaign | null> {
+        return this.db.readCampaignById(uid);
+    }
+    public pushCampaign(campignInfo: any): Promise<boolean> {
+        return this.db.writeCampaign(campignInfo);
+    }
+    public updateCampaign(campignInfo: any): Promise<boolean> {
+        return this.db.updateCampaign(campignInfo);
     }
 }

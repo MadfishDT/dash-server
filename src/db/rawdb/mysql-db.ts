@@ -1,4 +1,4 @@
-import { IUserInfo, IUserProfile, ICategory, ICCategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from '../dto/datadef'
+import { IUserInfo, IUserProfile, ICCampaign, ICategory, ICCategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from '../dto/datadef'
 import { DB } from './db';
 import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
@@ -102,20 +102,20 @@ export class MySqlDB extends DB {
                     resolve(null);
                 } else {
                     if (results && results.length > 0) {
-                            const cdatas = {
-                                id: results[0].id,
-                                desc: results[0].desc,
-                                data: results[0].data,
-                                date: results[0].date,
-                                code: results[0].code,
-                                ccode: results[0].ccode
-                            }
-                            resolve(cdatas);
-                        } else {
-                            resolve(null);
+                        const cdatas = {
+                            id: results[0].id,
+                            desc: results[0].desc,
+                            data: results[0].data,
+                            date: results[0].date,
+                            code: results[0].code,
+                            ccode: results[0].ccode
                         }
+                        resolve(cdatas);
+                    } else {
+                        resolve(null);
                     }
-                });
+                }
+            });
         });
     }
 
@@ -127,25 +127,25 @@ export class MySqlDB extends DB {
                     resolve(null);
                 } else {
                     if (results && results.length > 0) {
-                            const cdatas = {
-                                id: results[0].id,
-                                desc: results[0].descs,
-                                data: results[0].data,
-                                date: results[0].date,
-                                code: results[0].code,
-                                ccode: results[0].ccode
-                            }
-                            resolve(cdatas);
-                        } else {
-                            resolve(null);
+                        const cdatas = {
+                            id: results[0].id,
+                            desc: results[0].descs,
+                            data: results[0].data,
+                            date: results[0].date,
+                            code: results[0].code,
+                            ccode: results[0].ccode
                         }
+                        resolve(cdatas);
+                    } else {
+                        resolve(null);
                     }
-                });
+                }
+            });
         });
     }
 
     public writeCCategories(ccode: string, code: string, jsonData: any, descs: string): Promise<boolean> {
-        
+
         return new Promise<boolean>((resolve) => {
             let commentQuery = `INSERT INTO ccategories(ccode, code, data, descs) ` +
                 `VALUES('${ccode}','${code}','${this.convItToTextCode(JSON.stringify(jsonData))}', '${descs}')`;
@@ -162,7 +162,7 @@ export class MySqlDB extends DB {
     }
 
     public writeAnswers(userid: string, categorid: string, questionid: number, jsonData: any): Promise<boolean> {
-   
+
         return new Promise<boolean>((resolve) => {
             let commentQuery = `INSERT INTO answers(uid, answers, user_id, category_id, question_id) ` +
                 `VALUES('${categorid}-${userid}','${this.convItToTextCode(JSON.stringify(jsonData))}', ` +
@@ -181,17 +181,17 @@ export class MySqlDB extends DB {
     //query += `AND ui.company_code=ci.code LIMIT 1`;
     public readUserAnswers(categoryid: string): Promise<IUserAnswers[] | null> {
         return new Promise<IUserAnswers[] | null>((resolve, reject) => {
-            
-             const query = `SELECT a1.*, ua.email as email, ua.user_name as user_name FROM answers AS a1 JOIN user_info AS ua ` 
-             +`WHERE a1.id IN (SELECT max(id) as id FROM answers WHERE category_id='${categoryid}' GROUP BY user_id) AND ua.id=a1.user_id`;
-        
+
+            const query = `SELECT a1.*, ua.email as email, ua.user_name as user_name FROM answers AS a1 JOIN user_info AS ua `
+                + `WHERE a1.id IN (SELECT max(id) as id FROM answers WHERE category_id='${categoryid}' GROUP BY user_id) AND ua.id=a1.user_id`;
+
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(null);
                 } else {
                     if (results && results.length > 0) {
                         let resutsItems = new Array<IUserAnswers>();
-                        results.forEach( (resultItem: any) => {
+                        results.forEach((resultItem: any) => {
                             let answersDB: IUserAnswers | null = null;
                             answersDB = {
                                 id: resultItem.id,
@@ -207,6 +207,88 @@ export class MySqlDB extends DB {
                             resutsItems.push(answersDB);
                         });
                         resolve(resutsItems);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
+    public updateCampaign(campignInfo: any): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            const query = `UPDATE ccampaigns SET name='${campignInfo.name}' WHERE id='${campignInfo.uid}'`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
+    public writeCampaign(campignInfo: any): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            //IUserInfo
+            //uid, user_id, name,
+            let cQuestionsQuery = `INSERT INTO ccampaigns(uid, user_id, name) ` +
+                `VALUES('${campignInfo.uid}', '${campignInfo.user_id}', '${campignInfo.name}')`;
+            this.connection.query(cQuestionsQuery, (error) => {
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
+    public readCampaignsByUser(userId: string): Promise<ICCampaign[] | null> {
+        return new Promise<ICCampaign[] | null>((resolve, reject) => {
+            const query = `SELECT * FROM ccampaigns WHERE user_id='${userId}' ORDER BY date`;
+            this.connection.query(query, (error, results) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        let campaigns: ICCampaign[] = [];
+
+                        results.forEach((item: any) => {
+                            let campItem: ICCampaign = {
+                                uid: item.uid,
+                                user_id: item.user_id,
+                                id: item.category_id,
+                                name: item.name,
+                                date: item.date
+                            };
+                            campaigns.push(campItem);
+                        });
+                        resolve(campaigns);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
+    public readCampaignById(caId: string): Promise<ICCampaign | null> {
+        return new Promise<ICCampaign | null>((resolve, reject) => {
+            const query = `SELECT * FROM ccampaigns WHERE uid='${caId}'`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        let campItem: ICCampaign = {
+                            uid: results[0].uid,
+                            user_id: results[0].user_id,
+                            id: results[0].category_id,
+                            name: results[0].name,
+                            date: results[0].date
+                        };
+                        resolve(campItem);
                     } else {
                         resolve(null);
                     }
@@ -243,7 +325,7 @@ export class MySqlDB extends DB {
     public readAnswers(categoryid: number, userid: string): Promise<IAnswers | null> {
         return new Promise<IAnswers | null>((resolve, reject) => {
             const query = `SELECT ass.*, cq.data as questions FROM answers AS ass JOIN cquestions AS cq WHERE ass.category_id='${categoryid}' `
-            +`AND ass.user_id='${userid}' AND ass.question_id=cq.id ORDER BY ass.date DESC LIMIT 1`;
+                + `AND ass.user_id='${userid}' AND ass.question_id=cq.id ORDER BY ass.date DESC LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(null);
@@ -286,7 +368,7 @@ export class MySqlDB extends DB {
             this.connection.query(query,
                 (error, results, fields) => {
                     if (!error) {
-                        if(results.length >= 1) {
+                        if (results.length >= 1) {
                             resolve(true);
                         }
                         else {

@@ -37,6 +37,14 @@ export interface ICategory {
     children?: Array<ICategory> | null
 }
 
+export interface ICCampaign {
+    id: number;
+    name: string;
+    uid: string;
+    user_id: string;
+    date?: Date;
+}
+
 export interface ICCategory {
     id: number;
     desc: string;

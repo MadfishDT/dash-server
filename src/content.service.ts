@@ -1,6 +1,6 @@
 import { Gernerators } from './generators'
 import { ContentsDB} from './db/contents.db';
-import { ICategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers, ICCategory } from './db/dto/datadef';
+import { ICategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers, ICCategory, ICCampaign } from './db/dto/datadef';
 import * as fs from 'fs';
 import * as rx from 'rx';
 import { stringify } from 'querystring';
@@ -82,5 +82,17 @@ export class ContentsService {
     }
     public existCompany(code: string): Promise<boolean> {
         return this.contentsDB.existCompanyCode(code);
+    }
+    public getCampaignsByUser(userId: string): Promise<ICCampaign[] | null> {
+        return this.contentsDB.getCampaignsByUser(userId);
+    }
+    public getCampaignById(uid: string): Promise<ICCampaign | null> {
+        return this.contentsDB.getCampaignById(uid);
+    }
+    public pushCampaign(campignInfo: any): Promise<boolean> {
+        return this.contentsDB.pushCampaign(campignInfo);
+    }
+    public updateCampaign(campignInfo: any): Promise<boolean> {
+        return this.contentsDB.updateCampaign(campignInfo);
     }
 }

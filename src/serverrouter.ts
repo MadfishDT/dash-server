@@ -6,7 +6,7 @@ import LocalStrategy from 'passport-local';
 import { LoginSerivce } from './login.service';
 import cors from 'cors';
 import uuid from 'uuid/v4';
-import { IUserInfo } from './db/rawdb/dbs';
+import { IUserInfo, ICCampaign } from './db/rawdb/dbs';
 import { ResponseUtils } from './response';
 import { ContentsService } from './content.service';
 
@@ -521,6 +521,69 @@ export class ServerRouter {
 
     public addAnswerRouter(): void {
         this.app.post('/answers', async (req, res, next) => {
+            if (req.isAuthenticated()) {
+                const data = req.body.answers;
+                const result = await this.contentService.pushAnswers(req.user.id, req.body.cid, req.body.qid, data);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+
+    public addCampaignRouter(): void {
+        this.app.post('/pushcp', async (req, res, next) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const data = req.body;
+                const result = await this.contentService.pushCampaign(data as ICCampaign);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+
+    public addUpdateCampaignRouter(): void {
+        this.app.post('/udatecp', async (req, res, next) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const data = req.body;
+                const result = await this.contentService.updateCampaign(data as ICCampaign);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+
+    public addGetCampaignByUserRouter(): void {
+        this.app.post('/getcauser', async (req, res, next) => {
+            if (req.isAuthenticated()) {
+                const data = req.body.answers;
+                const result = await this.contentService.pushAnswers(req.user.id, req.body.cid, req.body.qid, data);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+    public addGetCampaignByIdRouter(): void {
+        this.app.post('/getcaid', async (req, res, next) => {
             if (req.isAuthenticated()) {
                 const data = req.body.answers;
                 const result = await this.contentService.pushAnswers(req.user.id, req.body.cid, req.body.qid, data);
