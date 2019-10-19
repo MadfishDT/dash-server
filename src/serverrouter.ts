@@ -91,6 +91,8 @@ export class ServerRouter {
             this.addGetCCategoriesByCompanyRouter();
             this.addGetCCategoriesRouter();
             this.addCCategoriesCreateRouter();
+            this.addCampaignRouter();
+            this.addGetCampaignsByUserRouter();
             return true;
         } catch (e) {
             return false;
@@ -537,10 +539,14 @@ export class ServerRouter {
 
     public addCampaignRouter(): void {
         this.app.post('/pushcp', async (req, res, next) => {
+            console.log('add new campaign called');
             if (req.isAuthenticated() && req.user.level >= 1) {
                 const data = req.body;
+                data.user_id = req.user.id;
+                console.log(`add campaign data is: ${JSON.stringify(req.body)}`);
                 const result = await this.contentService.pushCampaign(data as ICCampaign);
                 if (result) {
+                    console.log(`campaign added result is true`);
                     res.sendStatus(200);
                 } else {
                     res.sendStatus(400);
@@ -567,13 +573,13 @@ export class ServerRouter {
         });
     }
 
-    public addGetCampaignByUserRouter(): void {
-        this.app.post('/getcauser', async (req, res, next) => {
-            if (req.isAuthenticated()) {
+    public addGetCampaignsByUserRouter(): void {
+        this.app.get('/getcauser', async (req, res, next) => {
+            if (req.isAuthenticated() && req.user.level >=1) {
                 const data = req.body.answers;
-                const result = await this.contentService.pushAnswers(req.user.id, req.body.cid, req.body.qid, data);
+                const result = await this.contentService.getCampaignsByUser(req.user.id);
                 if (result) {
-                    res.sendStatus(200);
+                    res.json(result);
                 } else {
                     res.sendStatus(400);
                 }

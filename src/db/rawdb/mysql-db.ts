@@ -230,14 +230,16 @@ export class MySqlDB extends DB {
 
     public writeCampaign(campignInfo: any): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
-            //IUserInfo
-            //uid, user_id, name,
+            console.log('write campaign called');
             let cQuestionsQuery = `INSERT INTO ccampaigns(uid, user_id, name) ` +
                 `VALUES('${campignInfo.uid}', '${campignInfo.user_id}', '${campignInfo.name}')`;
+            console.log(cQuestionsQuery);
             this.connection.query(cQuestionsQuery, (error) => {
                 if (error) {
+                    console.log('fail writeCampaign');
                     resolve(false);
                 } else {
+                    console.log('success writeCampaign');
                     resolve(true);
                 }
             });
@@ -245,8 +247,10 @@ export class MySqlDB extends DB {
     }
 
     public readCampaignsByUser(userId: string): Promise<ICCampaign[] | null> {
+        console.log('readCampaignsByUser');
         return new Promise<ICCampaign[] | null>((resolve, reject) => {
             const query = `SELECT * FROM ccampaigns WHERE user_id='${userId}' ORDER BY date`;
+            console.log(`${query}`);
             this.connection.query(query, (error, results) => {
                 if (error) {
                     resolve(null);
