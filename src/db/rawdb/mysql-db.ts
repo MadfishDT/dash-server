@@ -4,6 +4,7 @@ import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
 import * as uuidv1 from 'uuid/v1';
 import { createConnection } from 'net';
+import { utimes } from 'fs';
 
 export class MySqlDB extends DB {
 
@@ -264,7 +265,9 @@ export class MySqlDB extends DB {
                                 user_id: item.user_id,
                                 id: item.category_id,
                                 name: item.name,
-                                date: item.date
+                                date: item.date,
+                                cid: item.cid,
+                                activated: item.activated
                             };
                             campaigns.push(campItem);
                         });
@@ -290,7 +293,9 @@ export class MySqlDB extends DB {
                             user_id: results[0].user_id,
                             id: results[0].category_id,
                             name: results[0].name,
-                            date: results[0].date
+                            date: results[0].date,
+                            cid: results[0].cid,
+                            activated: results[0].activated
                         };
                         resolve(campItem);
                     } else {
