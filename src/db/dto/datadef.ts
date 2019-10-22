@@ -43,8 +43,8 @@ export interface ICCampaign {
     uid: string;
     user_id: string;
     date?: Date;
-    cid: number;
-    activated: boolean;
+    cid?: number;
+    activated?: boolean;
 }
 
 export interface ICCategory {

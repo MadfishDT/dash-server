@@ -62,8 +62,8 @@ export class ServerRouter {
         this.app.use(passport.session());
 
         this.app.use(cors(option));
-        this.app.use(bodyparser.json({limit: '10mb'}));
-        this.app.use(bodyparser.urlencoded({ limit: '10mb', extended: true}));
+        this.app.use(bodyparser.json({ limit: '10mb' }));
+        this.app.use(bodyparser.urlencoded({ limit: '10mb', extended: true }));
         this.app.use('/photo', express.static(__dirname + '/../assets'));
         try {
             this.app.get('/', (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -93,6 +93,8 @@ export class ServerRouter {
             this.addCCategoriesCreateRouter();
             this.addCampaignRouter();
             this.addGetCampaignsByUserRouter();
+            this.addDeleteCampaignRouter();
+            this.addUpdateCampaignRouter();
             return true;
         } catch (e) {
             return false;
@@ -100,8 +102,8 @@ export class ServerRouter {
     }
 
     private addSessionRouter(): void {
-        
-        const sqlStore = new sqlSessionStore (
+
+        const sqlStore = new sqlSessionStore(
             this.loginService.sessionDBOptions
         );
 
@@ -239,7 +241,7 @@ export class ServerRouter {
         this.app.get('/ccategories', async (req, res) => {
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
-                    let result = await this.contentService.getCCategories(req.user.company_code,req.query.code);
+                    let result = await this.contentService.getCCategories(req.user.company_code, req.query.code);
                     if (result) {
                         res.json(result);
                     } else {
@@ -258,7 +260,7 @@ export class ServerRouter {
 
     public addGetUserAnswersByIdRouter(): void {
         this.app.get('/ucanswers', async (req, res) => {
-            if (req.isAuthenticated()  && req.user.level >= 1) {
+            if (req.isAuthenticated() && req.user.level >= 1) {
                 if (req.session && req.user) {
                     if (req.query.aid) {
                         let result = await this.contentService.getAnswersById(req.query.aid);
@@ -300,7 +302,7 @@ export class ServerRouter {
 
     public addGetUserAnswersRouter(): void {
         this.app.get('/uanswers', async (req, res) => {
-            if (req.isAuthenticated()  && req.user.level >= 1) {
+            if (req.isAuthenticated() && req.user.level >= 1) {
                 if (req.session && req.user) {
                     if (req.query.cid) {
                         let result = await this.contentService.getUserAnswers(req.query.cid);
@@ -339,8 +341,8 @@ export class ServerRouter {
             if (req.isAuthenticated() && req.user.level >= 1) {
                 const exitUser = await this.loginService.getUserByEmail(req.body.email);
                 const cInfo = await this.contentService.existCompany(req.body.ccode);
-                if(!exitUser) {
-                    if(!cInfo) {
+                if (!exitUser) {
+                    if (!cInfo) {
                         res.sendStatus(406);
                     }
                     const result = await this.loginService.pushNewUser(req.body);
@@ -420,13 +422,13 @@ export class ServerRouter {
 
     public addGetCompanysRouter(): void {
         this.app.get('/comp', async (req, res) => {
-          
-                let companys = await this.contentService.getCompanys()
-                if (companys) {
-                    res.json(companys);
-                } else {
-                    res.sendStatus(204); // not found user reponse
-                }
+
+            let companys = await this.contentService.getCompanys()
+            if (companys) {
+                res.json(companys);
+            } else {
+                res.sendStatus(204); // not found user reponse
+            }
         });
     }
 
@@ -561,6 +563,7 @@ export class ServerRouter {
         this.app.post('/udatecp', async (req, res, next) => {
             if (req.isAuthenticated() && req.user.level >= 1) {
                 const data = req.body;
+                console.log(data);
                 const result = await this.contentService.updateCampaign(data as ICCampaign);
                 if (result) {
                     res.sendStatus(200);
@@ -573,9 +576,27 @@ export class ServerRouter {
         });
     }
 
+    public addDeleteCampaignRouter(): void {
+        this.app.delete('/delcp', async (req, res, nex) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                if (req.query.uid && req.query.uid.length) {
+                    const uid = req.query.uid;
+                    const result = await this.contentService.removeCampaign(uid);
+                    if (result) {
+                        res.sendStatus(200);
+                    } else {
+                        res.sendStatus(400);
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        });
+    }
+
     public addGetCampaignsByUserRouter(): void {
         this.app.get('/getcauser', async (req, res, next) => {
-            if (req.isAuthenticated() && req.user.level >=1) {
+            if (req.isAuthenticated() && req.user.level >= 1) {
                 const data = req.body.answers;
                 const result = await this.contentService.getCampaignsByUser(req.user.id);
                 if (result) {

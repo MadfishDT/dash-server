@@ -83,4 +83,7 @@ export class ContentsDB {
     public updateCampaign(campignInfo: any): Promise<boolean> {
         return this.db.updateCampaign(campignInfo);
     }
+    public deleteCampaign(uid: string): Promise<boolean> {
+        return this.db.deleteCampaign(uid);
+    }
 }

@@ -216,9 +216,23 @@ export class MySqlDB extends DB {
         });
     }
 
+    public deleteCampaign(uid: string): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            const query = `DELETE FROM ccampaigns  WHERE uid='${uid}'`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
     public updateCampaign(campignInfo: any): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
-            const query = `UPDATE ccampaigns SET name='${campignInfo.name}' WHERE id='${campignInfo.uid}'`;
+            const query = `UPDATE ccampaigns SET name='${campignInfo.name}' WHERE uid='${campignInfo.uid}'`;
+            console.log(query);
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(false);

@@ -43,4 +43,5 @@ export abstract class DB {
     public abstract readCampaignById(udi: string): Promise<ICCampaign | null>;
     public abstract writeCampaign(campignInfo: any): Promise<boolean>;
     public abstract updateCampaign(campignInfo: any): Promise<boolean>;
+    public abstract deleteCampaign(uid: string): Promise<boolean>;
 }

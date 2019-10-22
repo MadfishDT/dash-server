@@ -95,4 +95,7 @@ export class ContentsService {
     public updateCampaign(campignInfo: any): Promise<boolean> {
         return this.contentsDB.updateCampaign(campignInfo);
     }
+    public removeCampaign(uid: string): Promise<boolean> {
+        return this.contentsDB.deleteCampaign(uid);
+    }
 }
