@@ -1,10 +1,21 @@
-import { IUserInfo, IUserProfile, ICCampaign, ICategory, ICCategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers } from '../dto/datadef'
+import { IUserInfo,
+         IUserProfile,
+         IPortfolioInfo,
+         IPortfolioInfos,
+         IPortfolioCompany,
+         ICCampaign,
+         ICategory,
+         ICCategory,
+         IQuestions,
+         IAnswers,
+         ICompany,
+         ICQuestions,
+         IUserAnswers } from '../dto/datadef'
+
 import { DB } from './db';
 import * as mysql from 'mysql';
 import { Gernerators } from '../../generators'
 import * as uuidv1 from 'uuid/v1';
-import { createConnection } from 'net';
-import { utimes } from 'fs';
 
 export class MySqlDB extends DB {
 
@@ -744,5 +755,72 @@ export class MySqlDB extends DB {
                 }
             });
         });
+    }
+
+    public getPortfolios(userId: string): Promise<IPortfolioInfos[] | null> {
+        return new Promise<IPortfolioInfos[] | null>((resolve, reject) => {
+            const query = `SELECT * FROM cportfolio WHERE user_id='${userId}'`;
+
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        let resultsItems = new Array<IPortfolioInfo>();
+                        results.forEach((result: any) => {
+                            let portInfo: IPortfolioInfo | null = null;
+                            portInfo = {
+                                id: result.id,
+                                pid: result.pid,
+                                company_name: result.company_name,
+                                company_code: result.company_code,
+                                name: result.name,
+                            };
+                            resultsItems.push(portInfo);
+                        });
+
+                        let portsResultsItems = new Array<IPortfolioInfos>();
+
+                        resultsItems.forEach( itemPort => {
+                            let portItem = portsResultsItems.find( (portsResult) => {
+                                return portsResult.pid === itemPort.pid;
+                            });
+
+                            if(!portItem) {
+                                portItem = {
+                                    pid: itemPort.pid,
+                                    name: itemPort.name,
+                                    companys: []
+                                }
+                            }
+
+                            if(portItem) {
+                               
+                                portItem.companys.push({
+                                    company_name: itemPort.company_name,
+                                    company_code: itemPort.company_code,
+                                });
+                            }
+                            portsResultsItems.push(portItem);
+                        });
+                        resolve(portsResultsItems);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
+    public updatePortfolios(portID: string, name: string): Promise<boolean> {
+
+    }
+
+    public insertPortfolios(portID: string): Promise<boolean> {
+
+    }
+
+    public deletePortfolios(portID: string): Promise<boolean> {
+
     }
 }

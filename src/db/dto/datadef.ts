@@ -10,6 +10,25 @@ export interface IUserInfo {
     agreement?: boolean;
 };
 
+export interface IPortfolioInfo {
+    id: number;
+    pid: string;
+    company_name: string;
+    company_code: string;
+    name: string;
+};
+
+export interface IPortfolioCompany {
+    company_name: string;
+    company_code: string;
+}
+
+export interface IPortfolioInfos {
+    pid: string;
+    name: string;
+    companys: Array<IPortfolioCompany>
+};
+
 export interface IUserProfile {
     id: string;
     email: string;

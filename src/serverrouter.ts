@@ -234,7 +234,7 @@ export class ServerRouter {
                     res.sendStatus(401);
                 }
             }
-        })
+        });
     }
 
     public addGetCCategoriesRouter(): void {
