@@ -26,7 +26,7 @@ export interface IPortfolioCompany {
 export interface IPortfolioInfos {
     pid: string;
     name: string;
-    companys: Array<IPortfolioCompany>
+    companies: Array<IPortfolioCompany>
 };
 
 export interface IUserProfile {

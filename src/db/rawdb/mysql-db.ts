@@ -414,6 +414,30 @@ export class MySqlDB extends DB {
                 });
         });
     }
+    public readCompanysByCode(code: string): Promise<ICompany | null> {
+        return new Promise<ICompany | null>(resolve => {
+            const query = `SELECT * FROM company_info WHERE code=${code} LIMITE 1`;
+            this.connection.query(query,
+                (error, results, fields) => {
+                    if (error) {
+                        resolve(null);
+                    } else {
+                        if (results && results.length > 0) {
+                            let compinfo: ICompany;
+                            compinfo = {
+                                id: results[0].id,
+                                code: results[0].code,
+                                name: results[0].name,
+                                desc: results[0].desc,
+                            }
+                            resolve(compinfo);
+                        } else {
+                            resolve(null);
+                        }
+                    }
+                });
+        });
+    }
     public readCompanys(): Promise<ICompany[] | null> {
         return new Promise<Array<ICompany> | null>(resolve => {
             const query = `SELECT * FROM company_info`;
@@ -758,69 +782,100 @@ export class MySqlDB extends DB {
     }
 
     public getPortfolios(userId: string): Promise<IPortfolioInfos[] | null> {
-        return new Promise<IPortfolioInfos[] | null>((resolve, reject) => {
+        
+        return new Promise<IPortfolioInfos[] | null>( (resolve, reject) => {
+
             const query = `SELECT * FROM cportfolio WHERE user_id='${userId}'`;
 
-            this.connection.query(query, (error, results, fields) => {
+            this.connection.query(query, async (error, results, fields) => {
                 if (error) {
                     resolve(null);
                 } else {
+                   
                     if (results && results.length > 0) {
-                        let resultsItems = new Array<IPortfolioInfo>();
-                        results.forEach((result: any) => {
-                            let portInfo: IPortfolioInfo | null = null;
+                        let resultsItems = new Array<IPortfolioInfos>();
+                        let comCodes: Array<string> = [];
+
+                        for(let result of results) {
+                            let portInfo: IPortfolioInfos | null = null;
                             portInfo = {
-                                id: result.id,
                                 pid: result.pid,
-                                company_name: result.company_name,
-                                company_code: result.company_code,
                                 name: result.name,
+                                companies: []
                             };
-                            resultsItems.push(portInfo);
-                        });
-
-                        let portsResultsItems = new Array<IPortfolioInfos>();
-
-                        resultsItems.forEach( itemPort => {
-                            let portItem = portsResultsItems.find( (portsResult) => {
-                                return portsResult.pid === itemPort.pid;
-                            });
-
-                            if(!portItem) {
-                                portItem = {
-                                    pid: itemPort.pid,
-                                    name: itemPort.name,
-                                    companys: []
+                            
+                            if(result.companies && result.companies.length > 0) {
+                                comCodes = JSON.parse(result.companies);
+                            }
+                            if(comCodes) {
+                                for(let code of comCodes) {
+                                    const cInfo = await this.readCompanysByCode(code);
+                                    if(cInfo) {
+                                        portInfo.companies.push({
+                                            company_name: cInfo.name,
+                                            company_code: cInfo.code
+                                        });
+                                    }
                                 }
                             }
-
-                            if(portItem) {
-                               
-                                portItem.companys.push({
-                                    company_name: itemPort.company_name,
-                                    company_code: itemPort.company_code,
-                                });
-                            }
-                            portsResultsItems.push(portItem);
-                        });
-                        resolve(portsResultsItems);
+                            resultsItems.push(portInfo);
+                        };
+                        resolve(resultsItems);
                     } else {
                         resolve(null);
                     }
+                      
+                }
+            });
+
+        });
+    }
+
+    public updatePortfolios(portInfos: IPortfolioInfos): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            const query = `UPDATE ccampaigns SET name='${portInfos.name}' name='${portInfos.companies}' WHERE pid='${portInfos.pid}'`;
+            console.log(query);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
                 }
             });
         });
     }
 
-    public updatePortfolios(portID: string, name: string): Promise<boolean> {
+    public insertPortfolios(portInfos: IPortfolioInfos, userID: string): Promise<boolean> {
 
-    }
+        return new Promise<boolean>((resolve) => {
+            let commentQuery = `INSERT INTO ccampaigns(name, pid, compaies, user_id) ` +
+                `VALUES('${portInfos.name}','${portInfos.pid}','${this.convItToTextCode(JSON.stringify(portInfos.companies))}', '${userID}')`;
 
-    public insertPortfolios(portID: string): Promise<boolean> {
+            this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
 
     }
 
     public deletePortfolios(portID: string): Promise<boolean> {
+
+        return new Promise<boolean>((resolve) => {
+            const query = `DELETE FROM cportfolio WHERE pid='${portID}'`;
+            this.connection.query(query, (error) => {
+                console.log(`writeAnswers query ${error}`);
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
 
     }
 }
