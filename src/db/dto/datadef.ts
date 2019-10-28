@@ -19,8 +19,8 @@ export interface IPortfolioInfo {
 };
 
 export interface IPortfolioCompany {
-    company_name: string;
-    company_code: string;
+    name: string;
+    code: string;
 }
 
 export interface IPortfolioInfos {

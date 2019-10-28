@@ -1,4 +1,4 @@
-import { DB, MySqlDB, ICategory, IQuestions, ICompany, ICQuestions,ICCampaign, IUserAnswers, ICCategory } from './rawdb/dbs';
+import { DB, MySqlDB, ICategory, IQuestions, ICompany, ICQuestions,ICCampaign, IPortfolioInfos, IUserAnswers, ICCategory } from './rawdb/dbs';
 import { IAnswers } from './dto/datadef';
 
 export class ContentsDB {
@@ -85,5 +85,8 @@ export class ContentsDB {
     }
     public deleteCampaign(uid: string): Promise<boolean> {
         return this.db.deleteCampaign(uid);
+    }
+    public getPortfolios(userId: string): Promise<IPortfolioInfos[] | null>  {
+        return this.db.readPortfolios(userId);
     }
 }

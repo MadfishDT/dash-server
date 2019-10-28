@@ -95,6 +95,7 @@ export class ServerRouter {
             this.addGetCampaignsByUserRouter();
             this.addDeleteCampaignRouter();
             this.addUpdateCampaignRouter();
+            this.addGetPortfolioRouter();
             return true;
         } catch (e) {
             return false;
@@ -643,4 +644,19 @@ export class ServerRouter {
             })(req, res, next);
         });
     }
+    public addGetPortfolioRouter(): void {
+        this.app.get('/getport', async (req, res, next) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = await this.contentService.getPortfolios(req.user.id);
+                if (result) {
+                    res.json(result);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+    
 }

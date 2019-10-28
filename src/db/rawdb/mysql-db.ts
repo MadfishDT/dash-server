@@ -416,7 +416,8 @@ export class MySqlDB extends DB {
     }
     public readCompanysByCode(code: string): Promise<ICompany | null> {
         return new Promise<ICompany | null>(resolve => {
-            const query = `SELECT * FROM company_info WHERE code=${code} LIMITE 1`;
+            const query = `SELECT * FROM company_info WHERE code='${code}' LIMIT 1`;
+            console.log(query);
             this.connection.query(query,
                 (error, results, fields) => {
                     if (error) {
@@ -781,7 +782,7 @@ export class MySqlDB extends DB {
         });
     }
 
-    public getPortfolios(userId: string): Promise<IPortfolioInfos[] | null> {
+    public readPortfolios(userId: string): Promise<IPortfolioInfos[] | null> {
         
         return new Promise<IPortfolioInfos[] | null>( (resolve, reject) => {
 
@@ -806,14 +807,16 @@ export class MySqlDB extends DB {
                             
                             if(result.companies && result.companies.length > 0) {
                                 comCodes = JSON.parse(result.companies);
+                                console.log(comCodes);
                             }
                             if(comCodes) {
                                 for(let code of comCodes) {
                                     const cInfo = await this.readCompanysByCode(code);
+                                    console.log(cInfo);
                                     if(cInfo) {
                                         portInfo.companies.push({
-                                            company_name: cInfo.name,
-                                            company_code: cInfo.code
+                                            name: cInfo.name,
+                                            code: cInfo.code
                                         });
                                     }
                                 }
