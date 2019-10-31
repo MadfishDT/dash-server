@@ -44,7 +44,7 @@ export abstract class DB {
     public abstract writeCampaign(campignInfo: any): Promise<boolean>;
     public abstract updateCampaign(campignInfo: any): Promise<boolean>;
     public abstract deleteCampaign(uid: string): Promise<boolean>;
-
+    public abstract updateCampaignStatus(uid: string, activated: boolean): Promise<boolean>;
     public abstract readPortfolios(userId: string): Promise<IPortfolioInfos[] | null>;
     public abstract updatePortfolios(portInfos: IPortfolioInfos): Promise<boolean>;
     public abstract deletePortfolios(porid: string): Promise<boolean>;

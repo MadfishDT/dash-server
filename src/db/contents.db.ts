@@ -83,6 +83,9 @@ export class ContentsDB {
     public updateCampaign(campignInfo: any): Promise<boolean> {
         return this.db.updateCampaign(campignInfo);
     }
+    public updateCampaignStatus(uid: string, activated: boolean): Promise<boolean> {
+        return this.db.updateCampaignStatus(uid, activated);
+    }
     public deleteCampaign(uid: string): Promise<boolean> {
         return this.db.deleteCampaign(uid);
     }

@@ -96,6 +96,7 @@ export class ServerRouter {
             this.addDeleteCampaignRouter();
             this.addUpdateCampaignRouter();
             this.addGetPortfolioRouter();
+            this.addUpdateCampaignStatusRouter();
             return true;
         } catch (e) {
             return false;
@@ -566,6 +567,22 @@ export class ServerRouter {
                 const data = req.body;
                 console.log(data);
                 const result = await this.contentService.updateCampaign(data as ICCampaign);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+
+    public addUpdateCampaignStatusRouter(): void {
+        this.app.post('/udatecps', async (req, res, next) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const data = req.body;
+                const result = await this.contentService.updateCampaignStatus(data.uid, data.activated);
                 if (result) {
                     res.sendStatus(200);
                 } else {

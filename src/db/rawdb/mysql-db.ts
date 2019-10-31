@@ -253,7 +253,20 @@ export class MySqlDB extends DB {
             });
         });
     }
-
+    public updateCampaignStatus(uid: string, activated: boolean): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            
+            const query = `UPDATE ccampaigns SET activated='${activated? 1 : 0}' WHERE uid='${uid}'`;
+            console.log(query);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
     public writeCampaign(campignInfo: any): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
             console.log('write campaign called');
@@ -283,8 +296,9 @@ export class MySqlDB extends DB {
                 } else {
                     if (results && results.length > 0) {
                         let campaigns: ICCampaign[] = [];
-
+                        
                         results.forEach((item: any) => {
+                            
                             let campItem: ICCampaign = {
                                 uid: item.uid,
                                 user_id: item.user_id,
@@ -292,8 +306,9 @@ export class MySqlDB extends DB {
                                 name: item.name,
                                 date: item.date,
                                 cid: item.cid,
-                                activated: item.activated
+                                activated: item.activated === 1 ? true : false
                             };
+                            console.log(`this is campaign : ${campItem.activated}`);
                             campaigns.push(campItem);
                         });
                         resolve(campaigns);
@@ -836,7 +851,7 @@ export class MySqlDB extends DB {
 
     public updatePortfolios(portInfos: IPortfolioInfos): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
-            const query = `UPDATE ccampaigns SET name='${portInfos.name}' name='${portInfos.companies}' WHERE pid='${portInfos.pid}'`;
+            const query = `UPDATE cportfolio SET name='${portInfos.name}' name='${portInfos.companies}' WHERE pid='${portInfos.pid}'`;
             console.log(query);
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
@@ -851,7 +866,7 @@ export class MySqlDB extends DB {
     public insertPortfolios(portInfos: IPortfolioInfos, userID: string): Promise<boolean> {
 
         return new Promise<boolean>((resolve) => {
-            let commentQuery = `INSERT INTO ccampaigns(name, pid, compaies, user_id) ` +
+            let commentQuery = `INSERT INTO cportfolio(name, pid, compaies, user_id) ` +
                 `VALUES('${portInfos.name}','${portInfos.pid}','${this.convItToTextCode(JSON.stringify(portInfos.companies))}', '${userID}')`;
 
             this.connection.query(commentQuery, (commenterror) => {

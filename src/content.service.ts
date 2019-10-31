@@ -101,4 +101,7 @@ export class ContentsService {
     public getPortfolios(userId: string): Promise<IPortfolioInfos[] | null>  {
         return this.contentsDB.getPortfolios(userId);
     }
+    public updateCampaignStatus(uid: string, activated: boolean): Promise<boolean> {
+        return this.contentsDB.updateCampaignStatus(uid, activated);
+    }
 }
