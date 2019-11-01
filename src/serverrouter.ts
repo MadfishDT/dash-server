@@ -97,6 +97,8 @@ export class ServerRouter {
             this.addUpdateCampaignRouter();
             this.addGetPortfolioRouter();
             this.addUpdateCampaignStatusRouter();
+            this.addGetCampaignsMappingsRouter();
+            this.addNewCampaignMappingsRouter();
             return true;
         } catch (e) {
             return false;
@@ -642,7 +644,34 @@ export class ServerRouter {
             }
         });
     }
-
+    public addGetCampaignsMappingsRouter(): void {
+        this.app.get('/getcm', async (req, res, next) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = await this.contentService.getCampaignCompanyMappings(req.query.uid);
+                if (result) {
+                    res.json(result);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+    public addNewCampaignMappingsRouter(): void {
+        this.app.post('/cmn', async (req, res, next) => {
+            if (req.isAuthenticated()) {
+                const result = await this.contentService.pushCampaignCompanyMapping(req.body.campaign, req.body.companies);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
     public addAdminLoginRouter(): void {
         this.app.post('/adminlogin', async (req, res, next) => {
             passport.authenticate('local', (err, user, info) => {

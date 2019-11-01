@@ -49,5 +49,7 @@ export abstract class DB {
     public abstract updatePortfolios(portInfos: IPortfolioInfos): Promise<boolean>;
     public abstract deletePortfolios(porid: string): Promise<boolean>;
     public abstract insertPortfolios(portInfos: IPortfolioInfos, userID: string): Promise<boolean>;
+    public abstract insertCampaignCompanyMapping(campaign: ICCampaign, companyCodes: Array<string>): Promise<boolean>;
+    public abstract readCampaignCompanyMappings(uid: string): Promise<IPortfolioInfos | null>
     
 }

@@ -862,7 +862,104 @@ export class MySqlDB extends DB {
             });
         });
     }
+    public deleteCampaignCompanyMapping(uid: string): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            const query = `DELETE FROM ccampaignmapping WHERE uid='${uid}'`;
+            this.connection.query(query, (error) => {
+                console.log(`writeAnswers query ${error}`);
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+     
+    }
+    public insertCampaignCompanyMapping(campaign: ICCampaign, companyCodes: Array<string>): Promise<boolean> {
 
+        return new Promise<boolean>(async (resolve) => {
+
+            const removeResult = await this.deleteCampaignCompanyMapping(campaign.uid);
+
+            let insertsCommand = '';
+            companyCodes.forEach((item, index) => {
+                insertsCommand += `('${campaign.uid}' , '${item}')`;
+                if(index < companyCodes.length - 1) {
+                    insertsCommand += ',';
+                }
+            });
+
+            let cMappingQuery = `INSERT INTO ccampaignmapping(uid, ccode) ` +
+                `VALUES`+ insertsCommand;
+            console.log(cMappingQuery);
+            this.connection.query(cMappingQuery, (commenterror) => {
+                console.log(`cMappingQuery query ${commenterror}`); 
+                if (commenterror) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    /*public readCampaignCompanyMappings(campaign: ICCampaign): Promise<boolean> {
+
+        return new Promise<boolean>(async (resolve) => {
+
+            
+            const cMappingQuery = `SELECT * FROM ccampaignmapping WHERE uid='${campaign.uid}'`;
+
+            this.connection.query(cMappingQuery, (commenterror) => {
+                console.log(`cMappingQuery query ${commenterror}`); 
+                if (commenterror) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }*/
+    public readCampaignCompanyMappings(uid: string): Promise<IPortfolioInfos | null> {
+        
+        return new Promise<IPortfolioInfos | null>( (resolve, reject) => {
+
+            //const query = `SELECT * FROM cportfolio WHERE user_id='${userId}'`;
+            const query = `SELECT * FROM ccampaignmapping WHERE uid='${uid}'`;
+
+            this.connection.query(query, async (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                   
+                    if (results && results.length > 0) {
+                      
+                        let portInfo: IPortfolioInfos | null = null;
+                        portInfo = {
+                            pid: '-1',
+                            name: '-1',
+                            companies: []
+                        };
+
+                        for(let item of results) {
+                            const cInfo = await this.readCompanysByCode(item.ccode);
+                            console.log(cInfo);
+                            if(cInfo) {
+                                portInfo.companies.push({
+                                    name: cInfo.name,
+                                    code: cInfo.code});
+                            }
+                            console.log(cInfo);
+                        }
+                        resolve(portInfo);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            });
+
+        });
+    }
     public insertPortfolios(portInfos: IPortfolioInfos, userID: string): Promise<boolean> {
 
         return new Promise<boolean>((resolve) => {
@@ -878,7 +975,6 @@ export class MySqlDB extends DB {
                 }
             });
         });
-
     }
 
     public deletePortfolios(portID: string): Promise<boolean> {

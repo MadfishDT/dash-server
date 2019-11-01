@@ -104,4 +104,10 @@ export class ContentsService {
     public updateCampaignStatus(uid: string, activated: boolean): Promise<boolean> {
         return this.contentsDB.updateCampaignStatus(uid, activated);
     }
+    public pushCampaignCompanyMapping(campaign: ICCampaign, companyCodes: Array<string>): Promise<boolean> {
+        return this.contentsDB.pushCampaignCompanyMapping(campaign, companyCodes);
+    }
+    public getCampaignCompanyMappings(uid: string): Promise<IPortfolioInfos | null> {
+        return this.contentsDB.getCampaignCompanyMappings(uid);
+    }
 }

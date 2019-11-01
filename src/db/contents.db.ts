@@ -92,4 +92,13 @@ export class ContentsDB {
     public getPortfolios(userId: string): Promise<IPortfolioInfos[] | null>  {
         return this.db.readPortfolios(userId);
     }
+
+    public pushCampaignCompanyMapping(campaign: ICCampaign, companyCodes: Array<string>): Promise<boolean> {
+        return this.db.insertCampaignCompanyMapping(campaign, companyCodes);
+    }
+
+    public getCampaignCompanyMappings(uid: string): Promise<IPortfolioInfos | null> {
+        return this.db.readCampaignCompanyMappings(uid);
+    }
+
 }
