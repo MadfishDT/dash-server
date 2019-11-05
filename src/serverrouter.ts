@@ -99,6 +99,13 @@ export class ServerRouter {
             this.addUpdateCampaignStatusRouter();
             this.addGetCampaignsMappingsRouter();
             this.addNewCampaignMappingsRouter();
+            this.addGetCCategoriesByUserRouter();
+            this.addUpdateCampaignTemplateRouter();
+            this.addGetCCategoriesByCodeRouter();
+            this.addCCategoriesNewRouter();
+            this.updateCCategoriesRouter();
+            this.updateCCategoriesNameRouter();
+            this.addDeleteCCategoryRouter();
             return true;
         } catch (e) {
             return false;
@@ -219,7 +226,26 @@ export class ServerRouter {
             }
         })
     }
-
+    public addGetCCategoriesByCodeRouter(): void {
+        this.app.get('/ccatecode', async (req, res) => {
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = await this.contentService.getCCategoriesByCode(req.query.code);
+                    if (result) {
+                        res.json(result);
+                    } else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        });
+    }
     public addGetCCategoriesByCompanyRouter(): void {
         this.app.get('/ccategoriescode', async (req, res) => {
             if (req.isAuthenticated()) {
@@ -239,6 +265,27 @@ export class ServerRouter {
                 }
             }
         });
+    }
+
+    public addGetCCategoriesByUserRouter(): void {
+        this.app.get('/ccategoriesuser', async (req, res) => {
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = await this.contentService.getCCategoriesByUser(req.user.id);
+                    if (result) {
+                        res.json(result);
+                    } else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        } else {
+                            res.sendStatus(404);
+                        }
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        })
     }
 
     public addGetCCategoriesRouter(): void {
@@ -357,6 +404,51 @@ export class ServerRouter {
                     }
                 } else {
                     res.sendStatus(409);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+    public addCCategoriesNewRouter(): void {
+        this.app.post('/nccategories', async (req, res, next) => {
+            console.log(`nccategories ${req.body.code}`);
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = await this.contentService.pushNCCategories(req.body.code, req.body.name, req.user.id);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+    public updateCCategoriesNameRouter(): void {
+        this.app.post('/unccategories', async (req, res, next) => {
+            console.log(`unccategories ${req.user.company_code} ${req.body.code} ${req.body.name}`);
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = await this.contentService.updateCCategoryName(req.body.code, req.body.name);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+    public updateCCategoriesRouter(): void {
+        this.app.post('/uccategories', async (req, res, next) => {
+            console.log(`uccategories ${req.user.company_code} ${req.body.code} ${req.body.data}, ${req.body.desc} `);
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = await this.contentService.updateCCategories(req.body.code, req.body.data, req.body.desc);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
                 }
             } else {
                 res.sendStatus(401);
@@ -580,6 +672,22 @@ export class ServerRouter {
         });
     }
 
+    public addUpdateCampaignTemplateRouter(): void {
+        this.app.post('/udatecpt', async (req, res, next) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const data = req.body;
+                const result = await this.contentService.updateCampaignTemplate(data.uid, data.ccode);
+                if (result) {
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+
     public addUpdateCampaignStatusRouter(): void {
         this.app.post('/udatecps', async (req, res, next) => {
             if (req.isAuthenticated() && req.user.level >= 1) {
@@ -595,7 +703,23 @@ export class ServerRouter {
             }
         });
     }
-
+    public addDeleteCCategoryRouter(): void {
+        this.app.delete('/delccategory', async (req, res, nex) => {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                if (req.query.code && req.query.code.length) {
+                    const code = req.query.code;
+                    const result = await this.contentService.removeCCategory(code);
+                    if (result) {
+                        res.sendStatus(200);
+                    } else {
+                        res.sendStatus(400);
+                    }
+                } else {
+                    res.sendStatus(401);
+                }
+            }
+        });
+    }
     public addDeleteCampaignRouter(): void {
         this.app.delete('/delcp', async (req, res, nex) => {
             if (req.isAuthenticated() && req.user.level >= 1) {

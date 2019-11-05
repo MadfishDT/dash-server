@@ -33,8 +33,15 @@ export abstract class DB {
     public abstract getSessionDBOptions(): any;
 
     public abstract writeCCategories(ccode: string, code: string, jsonData: any, desc: string): Promise<boolean>;
+    public abstract writeNCCategories(code: string, name: string, userID: string): Promise<boolean>
+    public abstract updateCCategoryName(code: string, name: any): Promise<boolean>;
+    public abstract updateCCategories(code: string, jsonData: any, descs: string): Promise<boolean>;
+    public abstract deleteCCategory(code: string): Promise<boolean>;
     public abstract readCCategories(companyCode: string, code: string): Promise<ICCategory | null>;
     public abstract readCCategoriesByCCode(companyCode: string): Promise<ICCategory | null>;
+    public abstract readCCategoriesByUser(userID: string): Promise<ICCategory[] | null>;
+    public abstract readCCategoriesByCode(code: string): Promise<ICCategory | null>;
+    
     public abstract writeUser(user: any): Promise<boolean>;
 
     public abstract existCompanyCode(code: string): Promise<boolean>;
@@ -45,6 +52,7 @@ export abstract class DB {
     public abstract updateCampaign(campignInfo: any): Promise<boolean>;
     public abstract deleteCampaign(uid: string): Promise<boolean>;
     public abstract updateCampaignStatus(uid: string, activated: boolean): Promise<boolean>;
+    public abstract updateCampaignTemplate(uid: string, ccode: string): Promise<boolean>;
     public abstract readPortfolios(userId: string): Promise<IPortfolioInfos[] | null>;
     public abstract updatePortfolios(portInfos: IPortfolioInfos): Promise<boolean>;
     public abstract deletePortfolios(porid: string): Promise<boolean>;

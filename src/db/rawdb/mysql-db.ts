@@ -106,6 +106,63 @@ export class MySqlDB extends DB {
         return result1.replace("'", "''");
     }
 
+    public readCCategoriesByUser(userID: string): Promise<ICCategory[] | null> {
+        return new Promise<ICCategory[] | null>(resolve => {
+            const query = `SELECT * FROM ccategories WHERE user_id='${userID}' ORDER BY date DESC`;
+            this.connection.query(query, async (error, results) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        let categoriesDatas: ICCategory[] = [];
+                        results.forEach( (item: any) => {
+                            const cdatas = {
+                                id: item.id,
+                                descs: item.descs,
+                                data: item.data,
+                                date: item.date,
+                                code: item.code,
+                                ccode: item.ccode,
+                                name: item.name
+                            }
+                            categoriesDatas.push(cdatas);
+                        })
+                      
+                        resolve(categoriesDatas);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
+    public readCCategoriesByCode(code: string): Promise<ICCategory | null> {
+        return new Promise<ICCategory | null>(resolve => {
+            const query = `SELECT * FROM ccategories WHERE code='${code}' ORDER BY date DESC LIMIT 1`;
+            this.connection.query(query, async (error, results) => {
+                if (error) {
+                    resolve(null);
+                } else {
+                    if (results && results.length > 0) {
+                        const cdatas = {
+                            id: results[0].id,
+                            descs: results[0].descs,
+                            data: results[0].data,
+                            date: results[0].date,
+                            code: results[0].code,
+                            ccode: results[0].ccode,
+                            name: results[0].name
+                        }
+                        resolve(cdatas);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
     public readCCategoriesByCCode(ccode: string): Promise<ICCategory | null> {
         return new Promise<ICCategory | null>(resolve => {
             const query = `SELECT * FROM ccategories WHERE ccode='${ccode}' ORDER BY date DESC LIMIT 1`;
@@ -116,7 +173,7 @@ export class MySqlDB extends DB {
                     if (results && results.length > 0) {
                         const cdatas = {
                             id: results[0].id,
-                            desc: results[0].desc,
+                            descs: results[0].descs,
                             data: results[0].data,
                             date: results[0].date,
                             code: results[0].code,
@@ -141,7 +198,7 @@ export class MySqlDB extends DB {
                     if (results && results.length > 0) {
                         const cdatas = {
                             id: results[0].id,
-                            desc: results[0].descs,
+                            descs: results[0].descs,
                             data: results[0].data,
                             date: results[0].date,
                             code: results[0].code,
@@ -151,6 +208,51 @@ export class MySqlDB extends DB {
                     } else {
                         resolve(null);
                     }
+                }
+            });
+        });
+    }
+
+    public writeNCCategories(code: string, name: string, userID: string): Promise<boolean> {
+
+        return new Promise<boolean>((resolve) => {
+            let commentQuery = `INSERT INTO ccategories(code, name, user_id) ` +
+                `VALUES('${code}','${name}', '${userID}')`;
+            this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
+    public updateCCategoryName(code: string, name: any): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            const query = `UPDATE ccategories SET name='${name}' WHERE code='${code}'`;
+            this.connection.query(query, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
+    public updateCCategories(code: string, jsonData: any, descs: string): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            const query = `UPDATE ccategories SET data='${this.convItToTextCode(JSON.stringify(jsonData))}', descs='${descs}' WHERE code='${code}'`;
+            console.log(query);
+            this.connection.query(query, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                } else {
+                    resolve(true);
                 }
             });
         });
@@ -226,7 +328,18 @@ export class MySqlDB extends DB {
             });
         });
     }
-
+    public deleteCCategory(code: string): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            const query = `DELETE FROM ccategories WHERE code='${code}'`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
     public deleteCampaign(uid: string): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
             const query = `DELETE FROM ccampaigns  WHERE uid='${uid}'`;
@@ -243,6 +356,20 @@ export class MySqlDB extends DB {
     public updateCampaign(campignInfo: any): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
             const query = `UPDATE ccampaigns SET name='${campignInfo.name}' WHERE uid='${campignInfo.uid}'`;
+            console.log(query);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    public updateCampaignTemplate(uid: string, ccode: string): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            
+            const query = `UPDATE ccampaigns SET ccode='${ccode}' WHERE uid='${uid}'`;
             console.log(query);
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
@@ -305,7 +432,7 @@ export class MySqlDB extends DB {
                                 id: item.category_id,
                                 name: item.name,
                                 date: item.date,
-                                cid: item.cid,
+                                ccode: item.ccode,
                                 activated: item.activated === 1 ? true : false
                             };
                             console.log(`this is campaign : ${campItem.activated}`);
@@ -334,7 +461,7 @@ export class MySqlDB extends DB {
                             id: results[0].category_id,
                             name: results[0].name,
                             date: results[0].date,
-                            cid: results[0].cid,
+                            ccode: results[0].ccode,
                             activated: results[0].activated
                         };
                         resolve(campItem);
@@ -631,7 +758,7 @@ export class MySqlDB extends DB {
                     if (results && results.length > 0) {
                         let categories = new Array<ICategory>();
                         results.forEach((item: any) => {
-                            categories.push({ id: item.id, name: item.name, desc: item.desc });
+                            categories.push({ id: item.id, name: item.name, descs: item.descs});
                         });
                         if (categories.length > 0) {
                             resolve(categories);
@@ -657,7 +784,7 @@ export class MySqlDB extends DB {
                             let categories = new Array<ICategory>();
                             for (let item of results) {
                                 let children = await this.readCategoriesChild(item.id);
-                                categories.push({ id: item.id, name: item.name, desc: item.desc, children: children });
+                                categories.push({ id: item.id, name: item.name, descs: item.desc, children: children });
                             }
                             if (categories.length > 0) {
                                 resolve(categories);

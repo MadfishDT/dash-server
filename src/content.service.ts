@@ -68,15 +68,25 @@ export class ContentsService {
     public async  pushCQuestions(categorid: string, data: any): Promise<boolean> {
         return this.contentsDB.pushCQuestions(categorid, data);
     }
-
+    public updateCCategoryName(code: string, name: any): Promise<boolean> {
+        return this.contentsDB.updateCCategoryName(code, name);
+    }
+    public updateCCategories(code: string, jsonData: any, descs: string): Promise<boolean> {
+        return this.contentsDB.updateCCategories(code, jsonData, descs);
+    }
     public async pushCCategories(ccode: string, code: string, data: any, desc: string): Promise<boolean> {
         return this.contentsDB.pushCCategories(ccode, code, data, desc);
     }
-
+    public pushNCCategories(code: string, name: string, userid: string): Promise<boolean> {
+        return this.contentsDB.pushNCCategories(code, name, userid);
+    }
     public getCCategories(companyCode: string, code: string): Promise<ICCategory | null>  {
         return this.contentsDB.getCCategories(companyCode, code);
     }
-
+    public getCCategoriesByUser(userID: string): Promise<ICCategory[] | null>  {
+        return  this.contentsDB.getCCategoriesByUser(userID);
+    }
+   
     public getCCategoriesByCCode(companyCode: string): Promise<ICCategory | null>  {
         return this.contentsDB.getCCategoriesByCCode(companyCode);
     }
@@ -104,10 +114,19 @@ export class ContentsService {
     public updateCampaignStatus(uid: string, activated: boolean): Promise<boolean> {
         return this.contentsDB.updateCampaignStatus(uid, activated);
     }
+    public updateCampaignTemplate(uid: string, ccode: string): Promise<boolean> {
+        return this.contentsDB.updateCampaignTemplate(uid, ccode);
+    }
     public pushCampaignCompanyMapping(campaign: ICCampaign, companyCodes: Array<string>): Promise<boolean> {
         return this.contentsDB.pushCampaignCompanyMapping(campaign, companyCodes);
     }
     public getCampaignCompanyMappings(uid: string): Promise<IPortfolioInfos | null> {
         return this.contentsDB.getCampaignCompanyMappings(uid);
+    }
+    public  getCCategoriesByCode(code: string): Promise<ICCategory | null>{
+        return this.contentsDB.getCCategoriesByCode(code);
+    }
+    public removeCCategory(code: string): Promise<boolean> {
+        return this.contentsDB.removeCCategory(code);
     }
 }

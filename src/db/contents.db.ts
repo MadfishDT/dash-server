@@ -53,21 +53,35 @@ export class ContentsDB {
     public getCQuestionRevision(id: number, revision: number): Promise< ICQuestions | null > {
         return this.db.readCQuestionRevision(id, revision);
     }
-
+    public removeCCategory(code: string): Promise<boolean> {
+        return this.db.deleteCCategory(code);
+    }
     public pushCQuestions(categorid: string, data: any): Promise<boolean> {
         return this.db.writeCQuestion(categorid, data);
     }
-
+    public updateCCategoryName(code: string, name: any): Promise<boolean> {
+        return this.db.updateCCategoryName(code, name);
+    }
+    public updateCCategories(code: string, jsonData: any, descs: string): Promise<boolean> {
+        return this.db.updateCCategories(code, jsonData, descs);
+    }
     public pushCCategories(ccode: string, code: string, data: any, desc: string): Promise<boolean> {
         return this.db.writeCCategories(ccode, code, data, desc);
     }
-
+    public pushNCCategories(code: string, name: string, userId: string): Promise<boolean> {
+        return this.db.writeNCCategories(code, name, userId);
+    }
     public getCCategories(companyCode: string, code: string): Promise<ICCategory | null>  {
         return this.db.readCCategories(companyCode, code);
     }
     public getCCategoriesByCCode(companyCode: string): Promise<ICCategory | null>  {
         return this.db.readCCategoriesByCCode(companyCode);
     }
+
+    public getCCategoriesByUser(userID: string): Promise<ICCategory[] | null>  {
+        return  this.db.readCCategoriesByUser(userID);
+    }
+   
     public existCompanyCode(code: string): Promise<boolean> {
         return this.db.existCompanyCode(code);
     }
@@ -86,6 +100,9 @@ export class ContentsDB {
     public updateCampaignStatus(uid: string, activated: boolean): Promise<boolean> {
         return this.db.updateCampaignStatus(uid, activated);
     }
+    public updateCampaignTemplate(uid: string, ccode: string): Promise<boolean> {
+        return this.db.updateCampaignTemplate(uid, ccode);
+    }
     public deleteCampaign(uid: string): Promise<boolean> {
         return this.db.deleteCampaign(uid);
     }
@@ -100,5 +117,7 @@ export class ContentsDB {
     public getCampaignCompanyMappings(uid: string): Promise<IPortfolioInfos | null> {
         return this.db.readCampaignCompanyMappings(uid);
     }
-
+    public  getCCategoriesByCode(code: string): Promise<ICCategory | null>{
+        return this.db.readCCategoriesByCode(code);
+    }
 }

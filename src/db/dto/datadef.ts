@@ -52,7 +52,7 @@ export interface IUserProfile {
 export interface ICategory {
     id: number;
     name: string;
-    desc: string;
+    descs: string;
     children?: Array<ICategory> | null
 }
 
@@ -62,13 +62,14 @@ export interface ICCampaign {
     uid: string;
     user_id: string;
     date?: Date;
-    cid?: number;
+    ccode?: string;
     activated?: boolean;
 }
 
 export interface ICCategory {
+    name?: string;
     id: number;
-    desc: string;
+    descs: string;
     data: any;
     date: Date;
     code: string;
