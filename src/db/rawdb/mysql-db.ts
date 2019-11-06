@@ -1030,23 +1030,41 @@ export class MySqlDB extends DB {
             });
         });
     }
-    /*public readCampaignCompanyMappings(campaign: ICCampaign): Promise<boolean> {
 
-        return new Promise<boolean>(async (resolve) => {
+    public readCampaignByCompany(ccode: string): Promise<ICCampaign[] | null> {
 
-            
-            const cMappingQuery = `SELECT * FROM ccampaignmapping WHERE uid='${campaign.uid}'`;
-
-            this.connection.query(cMappingQuery, (commenterror) => {
-                console.log(`cMappingQuery query ${commenterror}`); 
-                if (commenterror) {
-                    resolve(false);
+        return new Promise<ICCampaign[] | null>((resolve, reject) => {
+            const query = `SELECT cc.* FROM ccampaigns cc LEFT JOIN ccampaignmapping cm ON (cc.uid=cm.uid) WHERE cm.ccode='${ccode}' AND activated='1'`;
+            console.log(`${query}`);
+            this.connection.query(query, (error, results) => {
+                if (error) {
+                    resolve(null);
                 } else {
-                    resolve(true);
+                    if (results && results.length > 0) {
+                        let campaigns: ICCampaign[] = [];
+                        
+                        results.forEach((item: any) => {
+                            
+                            let campItem: ICCampaign = {
+                                uid: item.uid,
+                                user_id: item.user_id,
+                                id: item.category_id,
+                                name: item.name,
+                                date: item.date,
+                                ccode: item.ccode,
+                                activated: item.activated === 1 ? true : false
+                            };
+                            console.log(`this is campaign : ${campItem.activated}`);
+                            campaigns.push(campItem);
+                        });
+                        resolve(campaigns);
+                    } else {
+                        resolve(null);
+                    }
                 }
             });
         });
-    }*/
+    }
     public readCampaignCompanyMappings(uid: string): Promise<IPortfolioInfos | null> {
         
         return new Promise<IPortfolioInfos | null>( (resolve, reject) => {

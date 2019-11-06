@@ -1,5 +1,5 @@
 import { Gernerators } from './generators'
-import { ContentsDB} from './db/contents.db';
+import { ContentsDB } from './db/contents.db';
 import { ICategory, IQuestions, IAnswers, ICompany, ICQuestions, IUserAnswers, ICCategory, ICCampaign, IPortfolioInfos } from './db/dto/datadef';
 import * as fs from 'fs';
 import * as rx from 'rx';
@@ -7,16 +7,16 @@ import { stringify } from 'querystring';
 import * as uuidv1 from 'uuid/v1';
 
 export class ContentsService {
-  // tslint:disable-next-line:typedef-whitespace
-  private generators: Gernerators;
-  private categoriesSubject : rx.Subject<ICategory[]>;
-  private contentsDB : ContentsDB; 
+    // tslint:disable-next-line:typedef-whitespace
+    private generators: Gernerators;
+    private categoriesSubject: rx.Subject<ICategory[]>;
+    private contentsDB: ContentsDB;
 
-    public static bootstrap () : ContentsService {
+    public static bootstrap(): ContentsService {
         return new ContentsService();
     }
 
-    constructor () {
+    constructor() {
         this.generators = Gernerators.bootstrap();
         this.categoriesSubject = new rx.Subject<ICategory[]>();
         this.contentsDB = ContentsDB.getInstance();
@@ -24,7 +24,7 @@ export class ContentsService {
     public getNewUID(): string {
         let guid = uuidv1.default();
         return guid;
-    }    
+    }
     public async getCategories(companyCode: string): Promise<ICategory[] | null> {
         let result = await this.contentsDB.getCategories(companyCode);
         return result;
@@ -35,33 +35,33 @@ export class ContentsService {
         return result;
     }
 
-    public async getAnswers(cid: number, userID: string): Promise<IAnswers | null>  {
+    public async getAnswers(cid: number, userID: string): Promise<IAnswers | null> {
         let result = await this.contentsDB.getAnswers(cid, userID);
         return result;
     }
-    public async getAnswersById(answerId: number): Promise<IAnswers | null>  {
+    public async getAnswersById(answerId: number): Promise<IAnswers | null> {
         let result = await this.contentsDB.getAnswersById(answerId);
         return result;
     }
-    public async getUserAnswers(cid: string): Promise<IUserAnswers[] | null>  {
+    public async getUserAnswers(cid: string): Promise<IUserAnswers[] | null> {
         let result = await this.contentsDB.getUserAnswers(cid);
         return result;
     }
-    public async pushAnswers(userid: string, categoryid: string, questionid: number, answers: any): Promise<boolean>  {
+    public async pushAnswers(userid: string, categoryid: string, questionid: number, answers: any): Promise<boolean> {
         let result = await this.contentsDB.pushAnswers(userid, categoryid, questionid, answers);
         return result;
     }
 
     public async getCompanys(): Promise<ICompany[] | null> {
-        let result  = await this.contentsDB.getCompanys();
+        let result = await this.contentsDB.getCompanys();
         return result;
     }
 
-    public async getCQuestion(id: string): Promise< ICQuestions | null > {
+    public async getCQuestion(id: string): Promise<ICQuestions | null> {
         return this.contentsDB.getCQuestion(id);
     }
 
-    public async getCQuestionRevision(id: number, revision: number): Promise< ICQuestions | null > {
+    public async getCQuestionRevision(id: number, revision: number): Promise<ICQuestions | null> {
         return this.contentsDB.getCQuestionRevision(id, revision);
     }
 
@@ -80,14 +80,14 @@ export class ContentsService {
     public pushNCCategories(code: string, name: string, userid: string): Promise<boolean> {
         return this.contentsDB.pushNCCategories(code, name, userid);
     }
-    public getCCategories(companyCode: string, code: string): Promise<ICCategory | null>  {
+    public getCCategories(companyCode: string, code: string): Promise<ICCategory | null> {
         return this.contentsDB.getCCategories(companyCode, code);
     }
-    public getCCategoriesByUser(userID: string): Promise<ICCategory[] | null>  {
-        return  this.contentsDB.getCCategoriesByUser(userID);
+    public getCCategoriesByUser(userID: string): Promise<ICCategory[] | null> {
+        return this.contentsDB.getCCategoriesByUser(userID);
     }
-   
-    public getCCategoriesByCCode(companyCode: string): Promise<ICCategory | null>  {
+
+    public getCCategoriesByCCode(companyCode: string): Promise<ICCategory | null> {
         return this.contentsDB.getCCategoriesByCCode(companyCode);
     }
     public existCompany(code: string): Promise<boolean> {
@@ -108,7 +108,7 @@ export class ContentsService {
     public removeCampaign(uid: string): Promise<boolean> {
         return this.contentsDB.deleteCampaign(uid);
     }
-    public getPortfolios(userId: string): Promise<IPortfolioInfos[] | null>  {
+    public getPortfolios(userId: string): Promise<IPortfolioInfos[] | null> {
         return this.contentsDB.getPortfolios(userId);
     }
     public updateCampaignStatus(uid: string, activated: boolean): Promise<boolean> {
@@ -123,10 +123,13 @@ export class ContentsService {
     public getCampaignCompanyMappings(uid: string): Promise<IPortfolioInfos | null> {
         return this.contentsDB.getCampaignCompanyMappings(uid);
     }
-    public  getCCategoriesByCode(code: string): Promise<ICCategory | null>{
+    public getCCategoriesByCode(code: string): Promise<ICCategory | null> {
         return this.contentsDB.getCCategoriesByCode(code);
     }
     public removeCCategory(code: string): Promise<boolean> {
         return this.contentsDB.removeCCategory(code);
+    }
+    public getCampaignByCompany(ccode: string): Promise<ICCampaign[] | null> {
+        return this.contentsDB.getCampaignByCompany(ccode);
     }
 }

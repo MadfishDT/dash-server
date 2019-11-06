@@ -117,7 +117,10 @@ export class ContentsDB {
     public getCampaignCompanyMappings(uid: string): Promise<IPortfolioInfos | null> {
         return this.db.readCampaignCompanyMappings(uid);
     }
-    public  getCCategoriesByCode(code: string): Promise<ICCategory | null>{
+    public getCCategoriesByCode(code: string): Promise<ICCategory | null> {
         return this.db.readCCategoriesByCode(code);
+    }
+    public getCampaignByCompany(ccode: string): Promise<ICCampaign[] | null> {
+        return this.db.readCampaignByCompany(ccode);
     }
 }

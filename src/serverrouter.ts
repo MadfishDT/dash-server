@@ -106,6 +106,7 @@ export class ServerRouter {
             this.updateCCategoriesRouter();
             this.updateCCategoriesNameRouter();
             this.addDeleteCCategoryRouter();
+            this.addGetCampaignsByCCodeRouter();
             return true;
         } catch (e) {
             return false;
@@ -738,10 +739,24 @@ export class ServerRouter {
         });
     }
 
+    public addGetCampaignsByCCodeRouter(): void {
+        this.app.get('/ccampaigns', async (req, res, next) => {
+            if (req.isAuthenticated()) {
+                const result = await this.contentService.getCampaignByCompany(req.user.company_code);
+                if (result) {
+                    res.json(result);
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(401);
+            }
+        });
+    }
+
     public addGetCampaignsByUserRouter(): void {
         this.app.get('/getcauser', async (req, res, next) => {
             if (req.isAuthenticated() && req.user.level >= 1) {
-                const data = req.body.answers;
                 const result = await this.contentService.getCampaignsByUser(req.user.id);
                 if (result) {
                     res.json(result);
