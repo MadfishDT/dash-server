@@ -36,7 +36,7 @@ export class MySqlDB extends DB {
         this.sessionDBOptions = {
             host: 'localhost',
             user: 'qesg',
-            password: 'Jjang07',
+            password: 'Qwer$1234',
             database: 'sessions',
         };
 
@@ -44,7 +44,7 @@ export class MySqlDB extends DB {
             host: 'localhost',
             port: 3306,
             user: 'qesg',
-            password: 'Jjang07',
+            password: 'Qwer$1234',
             database: 'qesgs',
             connectionLimit: 220,
             waitForConnections: true,
