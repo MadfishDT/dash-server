@@ -89,19 +89,70 @@ class ContentsService {
             return this.contentsDB.pushCQuestions(categorid, data);
         });
     }
+    updateCCategoryName(code, name) {
+        return this.contentsDB.updateCCategoryName(code, name);
+    }
+    updateCCategories(code, jsonData, descs) {
+        return this.contentsDB.updateCCategories(code, jsonData, descs);
+    }
     pushCCategories(ccode, code, data, desc) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.contentsDB.pushCCategories(ccode, code, data, desc);
         });
     }
+    pushNCCategories(code, name, userid) {
+        return this.contentsDB.pushNCCategories(code, name, userid);
+    }
     getCCategories(companyCode, code) {
         return this.contentsDB.getCCategories(companyCode, code);
+    }
+    getCCategoriesByUser(userID) {
+        return this.contentsDB.getCCategoriesByUser(userID);
     }
     getCCategoriesByCCode(companyCode) {
         return this.contentsDB.getCCategoriesByCCode(companyCode);
     }
     existCompany(code) {
         return this.contentsDB.existCompanyCode(code);
+    }
+    getCampaignsByUser(userId) {
+        return this.contentsDB.getCampaignsByUser(userId);
+    }
+    getCampaignById(uid) {
+        return this.contentsDB.getCampaignById(uid);
+    }
+    pushCampaign(campignInfo) {
+        return this.contentsDB.pushCampaign(campignInfo);
+    }
+    updateCampaign(campignInfo) {
+        return this.contentsDB.updateCampaign(campignInfo);
+    }
+    removeCampaign(uid) {
+        return this.contentsDB.deleteCampaign(uid);
+    }
+    getPortfolios(userId) {
+        return this.contentsDB.getPortfolios(userId);
+    }
+    updateCampaignStatus(uid, activated) {
+        return this.contentsDB.updateCampaignStatus(uid, activated);
+    }
+    updateCampaignTemplate(uid, ccode) {
+        return this.contentsDB.updateCampaignTemplate(uid, ccode);
+    }
+    pushCampaignCompanyMapping(campaign, companyCodes) {
+        return this.contentsDB.pushCampaignCompanyMapping(campaign, companyCodes);
+    }
+    getCampaignCompanyMappings(uid) {
+        return this.contentsDB.getCampaignCompanyMappings(uid);
+    }
+    getCCategoriesByCode(code) {
+        return this.contentsDB.getCCategoriesByCode(code);
+    }
+    removeCCategory(code) {
+        return this.contentsDB.removeCCategory(code);
+    }
+    getCampaignByCompany(ccode) {
+        return this.contentsDB.getCampaignByCompany(ccode);
     }
 }
 exports.ContentsService = ContentsService;

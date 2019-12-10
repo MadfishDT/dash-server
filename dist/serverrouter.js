@@ -84,6 +84,22 @@ class ServerRouter {
             this.addGetCCategoriesByCompanyRouter();
             this.addGetCCategoriesRouter();
             this.addCCategoriesCreateRouter();
+            this.addCampaignRouter();
+            this.addGetCampaignsByUserRouter();
+            this.addDeleteCampaignRouter();
+            this.addUpdateCampaignRouter();
+            this.addGetPortfolioRouter();
+            this.addUpdateCampaignStatusRouter();
+            this.addGetCampaignsMappingsRouter();
+            this.addNewCampaignMappingsRouter();
+            this.addGetCCategoriesByUserRouter();
+            this.addUpdateCampaignTemplateRouter();
+            this.addGetCCategoriesByCodeRouter();
+            this.addCCategoriesNewRouter();
+            this.updateCCategoriesRouter();
+            this.updateCCategoriesNameRouter();
+            this.addDeleteCCategoryRouter();
+            this.addGetCampaignsByCCodeRouter();
             return true;
         }
         catch (e) {
@@ -197,11 +213,57 @@ class ServerRouter {
             }
         });
     }
+    addGetCCategoriesByCodeRouter() {
+        this.app.get('/ccatecode', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = yield this.contentService.getCCategoriesByCode(req.query.code);
+                    if (result) {
+                        res.json(result);
+                    }
+                    else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        }
+                        else {
+                            res.sendStatus(404);
+                        }
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        }));
+    }
     addGetCCategoriesByCompanyRouter() {
         this.app.get('/ccategoriescode', (req, res) => __awaiter(this, void 0, void 0, function* () {
             if (req.isAuthenticated()) {
                 if (req.session && req.user) {
                     let result = yield this.contentService.getCCategoriesByCCode(req.user.company_code);
+                    if (result) {
+                        res.json(result);
+                    }
+                    else {
+                        if (!req.user.agreement) {
+                            res.sendStatus(451);
+                        }
+                        else {
+                            res.sendStatus(404);
+                        }
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        }));
+    }
+    addGetCCategoriesByUserRouter() {
+        this.app.get('/ccategoriesuser', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated()) {
+                if (req.session && req.user) {
+                    let result = yield this.contentService.getCCategoriesByUser(req.user.id);
                     if (result) {
                         res.json(result);
                     }
@@ -347,6 +409,57 @@ class ServerRouter {
                 }
                 else {
                     res.sendStatus(409);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addCCategoriesNewRouter() {
+        this.app.post('/nccategories', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            console.log(`nccategories ${req.body.code}`);
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = yield this.contentService.pushNCCategories(req.body.code, req.body.name, req.user.id);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    updateCCategoriesNameRouter() {
+        this.app.post('/unccategories', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            console.log(`unccategories ${req.user.company_code} ${req.body.code} ${req.body.name}`);
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = yield this.contentService.updateCCategoryName(req.body.code, req.body.name);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    updateCCategoriesRouter() {
+        this.app.post('/uccategories', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            console.log(`uccategories ${req.user.company_code} ${req.body.code} ${req.body.data}, ${req.body.desc} `);
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = yield this.contentService.updateCCategories(req.body.code, req.body.data, req.body.desc);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
                 }
             }
             else {
@@ -537,6 +650,198 @@ class ServerRouter {
             }
         }));
     }
+    addCampaignRouter() {
+        this.app.post('/pushcp', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            console.log('add new campaign called');
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const data = req.body;
+                data.user_id = req.user.id;
+                console.log(`add campaign data is: ${JSON.stringify(req.body)}`);
+                const result = yield this.contentService.pushCampaign(data);
+                if (result) {
+                    console.log(`campaign added result is true`);
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addUpdateCampaignRouter() {
+        this.app.post('/udatecp', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const data = req.body;
+                console.log(data);
+                const result = yield this.contentService.updateCampaign(data);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addUpdateCampaignTemplateRouter() {
+        this.app.post('/udatecpt', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const data = req.body;
+                const result = yield this.contentService.updateCampaignTemplate(data.uid, data.ccode);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addUpdateCampaignStatusRouter() {
+        this.app.post('/udatecps', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const data = req.body;
+                const result = yield this.contentService.updateCampaignStatus(data.uid, data.activated);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addDeleteCCategoryRouter() {
+        this.app.delete('/delccategory', (req, res, nex) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                if (req.query.code && req.query.code.length) {
+                    const code = req.query.code;
+                    const result = yield this.contentService.removeCCategory(code);
+                    if (result) {
+                        res.sendStatus(200);
+                    }
+                    else {
+                        res.sendStatus(400);
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        }));
+    }
+    addDeleteCampaignRouter() {
+        this.app.delete('/delcp', (req, res, nex) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                if (req.query.uid && req.query.uid.length) {
+                    const uid = req.query.uid;
+                    const result = yield this.contentService.removeCampaign(uid);
+                    if (result) {
+                        res.sendStatus(200);
+                    }
+                    else {
+                        res.sendStatus(400);
+                    }
+                }
+                else {
+                    res.sendStatus(401);
+                }
+            }
+        }));
+    }
+    addGetCampaignsByCCodeRouter() {
+        this.app.get('/ccampaigns', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated()) {
+                const result = yield this.contentService.getCampaignByCompany(req.user.company_code);
+                if (result) {
+                    res.json(result);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addGetCampaignsByUserRouter() {
+        this.app.get('/getcauser', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = yield this.contentService.getCampaignsByUser(req.user.id);
+                if (result) {
+                    res.json(result);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addGetCampaignByIdRouter() {
+        this.app.post('/getcaid', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated()) {
+                const data = req.body.answers;
+                const result = yield this.contentService.pushAnswers(req.user.id, req.body.cid, req.body.qid, data);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addGetCampaignsMappingsRouter() {
+        this.app.get('/getcm', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = yield this.contentService.getCampaignCompanyMappings(req.query.uid);
+                if (result) {
+                    res.json(result);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
+    addNewCampaignMappingsRouter() {
+        this.app.post('/cmn', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated()) {
+                const result = yield this.contentService.pushCampaignCompanyMapping(req.body.campaign, req.body.companies);
+                if (result) {
+                    res.sendStatus(200);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
+        }));
+    }
     addAdminLoginRouter() {
         this.app.post('/adminlogin', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             passport_1.default.authenticate('local', (err, user, info) => {
@@ -554,6 +859,22 @@ class ServerRouter {
                     }
                 });
             })(req, res, next);
+        }));
+    }
+    addGetPortfolioRouter() {
+        this.app.get('/getport', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            if (req.isAuthenticated() && req.user.level >= 1) {
+                const result = yield this.contentService.getPortfolios(req.user.id);
+                if (result) {
+                    res.json(result);
+                }
+                else {
+                    res.sendStatus(400);
+                }
+            }
+            else {
+                res.sendStatus(401);
+            }
         }));
     }
 }

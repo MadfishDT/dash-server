@@ -39,11 +39,23 @@ class ContentsDB {
     getCQuestionRevision(id, revision) {
         return this.db.readCQuestionRevision(id, revision);
     }
+    removeCCategory(code) {
+        return this.db.deleteCCategory(code);
+    }
     pushCQuestions(categorid, data) {
         return this.db.writeCQuestion(categorid, data);
     }
+    updateCCategoryName(code, name) {
+        return this.db.updateCCategoryName(code, name);
+    }
+    updateCCategories(code, jsonData, descs) {
+        return this.db.updateCCategories(code, jsonData, descs);
+    }
     pushCCategories(ccode, code, data, desc) {
         return this.db.writeCCategories(ccode, code, data, desc);
+    }
+    pushNCCategories(code, name, userId) {
+        return this.db.writeNCCategories(code, name, userId);
     }
     getCCategories(companyCode, code) {
         return this.db.readCCategories(companyCode, code);
@@ -51,8 +63,47 @@ class ContentsDB {
     getCCategoriesByCCode(companyCode) {
         return this.db.readCCategoriesByCCode(companyCode);
     }
+    getCCategoriesByUser(userID) {
+        return this.db.readCCategoriesByUser(userID);
+    }
     existCompanyCode(code) {
         return this.db.existCompanyCode(code);
+    }
+    getCampaignsByUser(userId) {
+        return this.db.readCampaignsByUser(userId);
+    }
+    getCampaignById(uid) {
+        return this.db.readCampaignById(uid);
+    }
+    pushCampaign(campignInfo) {
+        return this.db.writeCampaign(campignInfo);
+    }
+    updateCampaign(campignInfo) {
+        return this.db.updateCampaign(campignInfo);
+    }
+    updateCampaignStatus(uid, activated) {
+        return this.db.updateCampaignStatus(uid, activated);
+    }
+    updateCampaignTemplate(uid, ccode) {
+        return this.db.updateCampaignTemplate(uid, ccode);
+    }
+    deleteCampaign(uid) {
+        return this.db.deleteCampaign(uid);
+    }
+    getPortfolios(userId) {
+        return this.db.readPortfolios(userId);
+    }
+    pushCampaignCompanyMapping(campaign, companyCodes) {
+        return this.db.insertCampaignCompanyMapping(campaign, companyCodes);
+    }
+    getCampaignCompanyMappings(uid) {
+        return this.db.readCampaignCompanyMappings(uid);
+    }
+    getCCategoriesByCode(code) {
+        return this.db.readCCategoriesByCode(code);
+    }
+    getCampaignByCompany(ccode) {
+        return this.db.readCampaignByCompany(ccode);
     }
 }
 exports.ContentsDB = ContentsDB;

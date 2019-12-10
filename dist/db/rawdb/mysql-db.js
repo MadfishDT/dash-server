@@ -32,14 +32,14 @@ class MySqlDB extends db_1.DB {
         this.sessionDBOptions = {
             host: 'localhost',
             user: 'qesg',
-            password: 'Jjang07',
+            password: 'Qwer$1234',
             database: 'sessions',
         };
         this.connection = mysql.createPool({
             host: 'localhost',
             port: 3306,
             user: 'qesg',
-            password: 'Jjang07',
+            password: 'Qwer$1234',
             database: 'qesgs',
             connectionLimit: 220,
             waitForConnections: true,
@@ -89,6 +89,64 @@ class MySqlDB extends db_1.DB {
         let result1 = text.replace(/([\\\n\r])/g, `\\$&`);
         return result1.replace("'", "''");
     }
+    readCCategoriesByUser(userID) {
+        return new Promise(resolve => {
+            const query = `SELECT * FROM ccategories WHERE user_id='${userID}' ORDER BY date DESC`;
+            this.connection.query(query, (error, results) => __awaiter(this, void 0, void 0, function* () {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let categoriesDatas = [];
+                        results.forEach((item) => {
+                            const cdatas = {
+                                id: item.id,
+                                descs: item.descs,
+                                data: item.data,
+                                date: item.date,
+                                code: item.code,
+                                ccode: item.ccode,
+                                name: item.name
+                            };
+                            categoriesDatas.push(cdatas);
+                        });
+                        resolve(categoriesDatas);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            }));
+        });
+    }
+    readCCategoriesByCode(code) {
+        return new Promise(resolve => {
+            const query = `SELECT * FROM ccategories WHERE code='${code}' ORDER BY date DESC LIMIT 1`;
+            this.connection.query(query, (error, results) => __awaiter(this, void 0, void 0, function* () {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        const cdatas = {
+                            id: results[0].id,
+                            descs: results[0].descs,
+                            data: results[0].data,
+                            date: results[0].date,
+                            code: results[0].code,
+                            ccode: results[0].ccode,
+                            name: results[0].name
+                        };
+                        resolve(cdatas);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            }));
+        });
+    }
     readCCategoriesByCCode(ccode) {
         return new Promise(resolve => {
             const query = `SELECT * FROM ccategories WHERE ccode='${ccode}' ORDER BY date DESC LIMIT 1`;
@@ -100,7 +158,7 @@ class MySqlDB extends db_1.DB {
                     if (results && results.length > 0) {
                         const cdatas = {
                             id: results[0].id,
-                            desc: results[0].desc,
+                            descs: results[0].descs,
                             data: results[0].data,
                             date: results[0].date,
                             code: results[0].code,
@@ -126,7 +184,7 @@ class MySqlDB extends db_1.DB {
                     if (results && results.length > 0) {
                         const cdatas = {
                             id: results[0].id,
-                            desc: results[0].descs,
+                            descs: results[0].descs,
                             data: results[0].data,
                             date: results[0].date,
                             code: results[0].code,
@@ -139,6 +197,50 @@ class MySqlDB extends db_1.DB {
                     }
                 }
             }));
+        });
+    }
+    writeNCCategories(code, name, userID) {
+        return new Promise((resolve) => {
+            let commentQuery = `INSERT INTO ccategories(code, name, user_id) ` +
+                `VALUES('${code}','${name}', '${userID}')`;
+            this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    updateCCategoryName(code, name) {
+        return new Promise((resolve) => {
+            const query = `UPDATE ccategories SET name='${name}' WHERE code='${code}'`;
+            this.connection.query(query, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    updateCCategories(code, jsonData, descs) {
+        return new Promise((resolve) => {
+            const query = `UPDATE ccategories SET data='${this.convItToTextCode(JSON.stringify(jsonData))}', descs='${descs}' WHERE code='${code}'`;
+            console.log(query);
+            this.connection.query(query, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
         });
     }
     writeCCategories(ccode, code, jsonData, descs) {
@@ -200,6 +302,153 @@ class MySqlDB extends db_1.DB {
                             resutsItems.push(answersDB);
                         });
                         resolve(resutsItems);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+    deleteCCategory(code) {
+        return new Promise((resolve) => {
+            const query = `DELETE FROM ccategories WHERE code='${code}'`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    deleteCampaign(uid) {
+        return new Promise((resolve) => {
+            const query = `DELETE FROM ccampaigns  WHERE uid='${uid}'`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    updateCampaign(campignInfo) {
+        return new Promise((resolve) => {
+            const query = `UPDATE ccampaigns SET name='${campignInfo.name}' WHERE uid='${campignInfo.uid}'`;
+            console.log(query);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    updateCampaignTemplate(uid, ccode) {
+        return new Promise((resolve) => {
+            const query = `UPDATE ccampaigns SET ccode='${ccode}' WHERE uid='${uid}'`;
+            console.log(query);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    updateCampaignStatus(uid, activated) {
+        return new Promise((resolve) => {
+            const query = `UPDATE ccampaigns SET activated='${activated ? 1 : 0}' WHERE uid='${uid}'`;
+            console.log(query);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    writeCampaign(campignInfo) {
+        return new Promise((resolve) => {
+            console.log('write campaign called');
+            let cQuestionsQuery = `INSERT INTO ccampaigns(uid, user_id, name) ` +
+                `VALUES('${campignInfo.uid}', '${campignInfo.user_id}', '${campignInfo.name}')`;
+            console.log(cQuestionsQuery);
+            this.connection.query(cQuestionsQuery, (error) => {
+                if (error) {
+                    console.log('fail writeCampaign');
+                    resolve(false);
+                }
+                else {
+                    console.log('success writeCampaign');
+                    resolve(true);
+                }
+            });
+        });
+    }
+    readCampaignsByUser(userId) {
+        console.log('readCampaignsByUser');
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM ccampaigns WHERE user_id='${userId}' ORDER BY date`;
+            console.log(`${query}`);
+            this.connection.query(query, (error, results) => {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let campaigns = [];
+                        results.forEach((item) => {
+                            let campItem = {
+                                uid: item.uid,
+                                user_id: item.user_id,
+                                id: item.category_id,
+                                name: item.name,
+                                date: item.date,
+                                ccode: item.ccode,
+                                activated: item.activated === 1 ? true : false
+                            };
+                            console.log(`this is campaign : ${campItem.activated}`);
+                            campaigns.push(campItem);
+                        });
+                        resolve(campaigns);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+    readCampaignById(caId) {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM ccampaigns WHERE uid='${caId}'`;
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let campItem = {
+                            uid: results[0].uid,
+                            user_id: results[0].user_id,
+                            id: results[0].category_id,
+                            name: results[0].name,
+                            date: results[0].date,
+                            ccode: results[0].ccode,
+                            activated: results[0].activated
+                        };
+                        resolve(campItem);
                     }
                     else {
                         resolve(null);
@@ -287,6 +536,32 @@ class MySqlDB extends db_1.DB {
                 }
                 else {
                     resolve(false);
+                }
+            });
+        });
+    }
+    readCompanysByCode(code) {
+        return new Promise(resolve => {
+            const query = `SELECT * FROM company_info WHERE code='${code}' LIMIT 1`;
+            console.log(query);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let compinfo;
+                        compinfo = {
+                            id: results[0].id,
+                            code: results[0].code,
+                            name: results[0].name,
+                            desc: results[0].desc,
+                        };
+                        resolve(compinfo);
+                    }
+                    else {
+                        resolve(null);
+                    }
                 }
             });
         });
@@ -473,7 +748,7 @@ class MySqlDB extends db_1.DB {
                     if (results && results.length > 0) {
                         let categories = new Array();
                         results.forEach((item) => {
-                            categories.push({ id: item.id, name: item.name, desc: item.desc });
+                            categories.push({ id: item.id, name: item.name, descs: item.descs });
                         });
                         if (categories.length > 0) {
                             resolve(categories);
@@ -501,7 +776,7 @@ class MySqlDB extends db_1.DB {
                         let categories = new Array();
                         for (let item of results) {
                             let children = yield this.readCategoriesChild(item.id);
-                            categories.push({ id: item.id, name: item.name, desc: item.desc, children: children });
+                            categories.push({ id: item.id, name: item.name, descs: item.desc, children: children });
                         }
                         if (categories.length > 0) {
                             resolve(categories);
@@ -644,6 +919,202 @@ class MySqlDB extends db_1.DB {
                     else {
                         resolve(null);
                     }
+                }
+            });
+        });
+    }
+    readPortfolios(userId) {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM cportfolio WHERE user_id='${userId}'`;
+            this.connection.query(query, (error, results, fields) => __awaiter(this, void 0, void 0, function* () {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let resultsItems = new Array();
+                        let comCodes = [];
+                        for (let result of results) {
+                            let portInfo = null;
+                            portInfo = {
+                                pid: result.pid,
+                                name: result.name,
+                                companies: []
+                            };
+                            if (result.companies && result.companies.length > 0) {
+                                comCodes = JSON.parse(result.companies);
+                                console.log(comCodes);
+                            }
+                            if (comCodes) {
+                                for (let code of comCodes) {
+                                    const cInfo = yield this.readCompanysByCode(code);
+                                    console.log(cInfo);
+                                    if (cInfo) {
+                                        portInfo.companies.push({
+                                            name: cInfo.name,
+                                            code: cInfo.code
+                                        });
+                                    }
+                                }
+                            }
+                            resultsItems.push(portInfo);
+                        }
+                        ;
+                        resolve(resultsItems);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            }));
+        });
+    }
+    updatePortfolios(portInfos) {
+        return new Promise((resolve) => {
+            const query = `UPDATE cportfolio SET name='${portInfos.name}' name='${portInfos.companies}' WHERE pid='${portInfos.pid}'`;
+            console.log(query);
+            this.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    deleteCampaignCompanyMapping(uid) {
+        return new Promise((resolve) => {
+            const query = `DELETE FROM ccampaignmapping WHERE uid='${uid}'`;
+            this.connection.query(query, (error) => {
+                console.log(`writeAnswers query ${error}`);
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    insertCampaignCompanyMapping(campaign, companyCodes) {
+        return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+            const removeResult = yield this.deleteCampaignCompanyMapping(campaign.uid);
+            let insertsCommand = '';
+            companyCodes.forEach((item, index) => {
+                insertsCommand += `('${campaign.uid}' , '${item}')`;
+                if (index < companyCodes.length - 1) {
+                    insertsCommand += ',';
+                }
+            });
+            let cMappingQuery = `INSERT INTO ccampaignmapping(uid, ccode) ` +
+                `VALUES` + insertsCommand;
+            console.log(cMappingQuery);
+            this.connection.query(cMappingQuery, (commenterror) => {
+                console.log(`cMappingQuery query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        }));
+    }
+    readCampaignByCompany(ccode) {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT cc.* FROM ccampaigns cc LEFT JOIN ccampaignmapping cm ON (cc.uid=cm.uid) WHERE cm.ccode='${ccode}' AND activated='1'`;
+            console.log(`${query}`);
+            this.connection.query(query, (error, results) => {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let campaigns = [];
+                        results.forEach((item) => {
+                            let campItem = {
+                                uid: item.uid,
+                                user_id: item.user_id,
+                                id: item.category_id,
+                                name: item.name,
+                                date: item.date,
+                                ccode: item.ccode,
+                                activated: item.activated === 1 ? true : false
+                            };
+                            console.log(`this is campaign : ${campItem.activated}`);
+                            campaigns.push(campItem);
+                        });
+                        resolve(campaigns);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+    readCampaignCompanyMappings(uid) {
+        return new Promise((resolve, reject) => {
+            //const query = `SELECT * FROM cportfolio WHERE user_id='${userId}'`;
+            const query = `SELECT * FROM ccampaignmapping WHERE uid='${uid}'`;
+            this.connection.query(query, (error, results, fields) => __awaiter(this, void 0, void 0, function* () {
+                if (error) {
+                    resolve(null);
+                }
+                else {
+                    if (results && results.length > 0) {
+                        let portInfo = null;
+                        portInfo = {
+                            pid: '-1',
+                            name: '-1',
+                            companies: []
+                        };
+                        for (let item of results) {
+                            const cInfo = yield this.readCompanysByCode(item.ccode);
+                            console.log(cInfo);
+                            if (cInfo) {
+                                portInfo.companies.push({
+                                    name: cInfo.name,
+                                    code: cInfo.code
+                                });
+                            }
+                            console.log(cInfo);
+                        }
+                        resolve(portInfo);
+                    }
+                    else {
+                        resolve(null);
+                    }
+                }
+            }));
+        });
+    }
+    insertPortfolios(portInfos, userID) {
+        return new Promise((resolve) => {
+            let commentQuery = `INSERT INTO cportfolio(name, pid, compaies, user_id) ` +
+                `VALUES('${portInfos.name}','${portInfos.pid}','${this.convItToTextCode(JSON.stringify(portInfos.companies))}', '${userID}')`;
+            this.connection.query(commentQuery, (commenterror) => {
+                console.log(`writeAnswers query ${commenterror}`);
+                if (commenterror) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    deletePortfolios(portID) {
+        return new Promise((resolve) => {
+            const query = `DELETE FROM cportfolio WHERE pid='${portID}'`;
+            this.connection.query(query, (error) => {
+                console.log(`writeAnswers query ${error}`);
+                if (error) {
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
                 }
             });
         });
