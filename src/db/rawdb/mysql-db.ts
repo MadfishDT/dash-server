@@ -862,6 +862,7 @@ export class MySqlDB extends DB {
             query += `AND ui.company_code=ci.code LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
+                   
                     resolve(null);
                 } else {
                     if (results && results.length > 0) {
