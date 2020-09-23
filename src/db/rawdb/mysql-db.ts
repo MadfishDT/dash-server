@@ -35,16 +35,16 @@ export class MySqlDB extends DB {
 
         this.sessionDBOptions = {
             host: 'localhost',
-            user: 'qesg',
-            password: 'Qwer$1234',
+            user: 'quser',
+            password: 'jjang07',
             database: 'sessions',
         };
 
         this.connection = mysql.createPool({
             host: 'localhost',
             port: 3306,
-            user: 'qesg',
-            password: 'Qwer$1234',
+            user: 'quser',
+            password: 'jjang07',
             database: 'qesgs',
             connectionLimit: 220,
             waitForConnections: true,
@@ -719,6 +719,7 @@ export class MySqlDB extends DB {
             query += `AND ui.password='${password}' AND ui.company_code=ci.code AND ui.code='${code}' LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
+                    console.log(error)
                     resolve(null);
                 } else {
                     if (results && results.length > 0) {
@@ -892,13 +893,16 @@ export class MySqlDB extends DB {
     }
     public readValidUser(email: string, password: string): Promise<IUserInfo | null> {
         return new Promise<IUserInfo | null>(resolve => {
+            console.log(email,password)
             let query = `SELECT ui.email, ui.id, ui.photo, ui.user_name, ui.level, ui.company_code, ui.agreement, ci.name as cname `;
             query += `FROM user_info AS ui JOIN company_info AS ci ON ui.email='${email}' `;
             query += `AND ui.password='${password}' AND ui.company_code=ci.code LIMIT 1`;
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
+                    console.log(error)
                     resolve(null);
                 } else {
+                    console.log(results)
                     if (results && results.length > 0) {
                         if (results[0].level <= 0) {
                             let userInDB: IUserInfo | null = null;

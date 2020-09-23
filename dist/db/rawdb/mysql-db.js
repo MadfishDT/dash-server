@@ -31,15 +31,15 @@ class MySqlDB extends db_1.DB {
         console.log('runing my sql prod mode');
         this.sessionDBOptions = {
             host: 'localhost',
-            user: 'qesg',
-            password: 'Qwer$1234',
+            user: 'quser',
+            password: 'jjang07',
             database: 'sessions',
         };
         this.connection = mysql.createPool({
             host: 'localhost',
             port: 3306,
-            user: 'qesg',
-            password: 'Qwer$1234',
+            user: 'quser',
+            password: 'jjang07',
             database: 'qesgs',
             connectionLimit: 220,
             waitForConnections: true,
@@ -326,6 +326,7 @@ class MySqlDB extends db_1.DB {
     deleteCampaign(uid) {
         return new Promise((resolve) => {
             const query = `DELETE FROM ccampaigns  WHERE uid='${uid}'`;
+            console.log('캠패인삭제')
             this.connection.query(query, (error, results, fields) => {
                 if (error) {
                     resolve(false);

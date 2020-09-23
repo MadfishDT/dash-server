@@ -26,7 +26,7 @@ const responseResultCode = {
 
 const corsOptions = {
     'origin': ['http://localhost:8080', 'http://localhost:8081', 'http://qesg-dev.ddns.net:8080', 'http://qesg-dev.ddns.net',
-        'http://localhost:8082', 'http://35.193.127.219:8080'],
+        'http://localhost:8082', 'http://35.193.127.219:8080','http://10.167.117.161:8080' ],
     'methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
     'preflightContinue': false,
     'credentials': true,
